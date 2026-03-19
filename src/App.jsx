@@ -48,6 +48,85 @@ export default function AnkkiDesignV2() {
   const [pptSingleSubCategory, setPptSingleSubCategory] = useState('cover');
   const [previewPPT, setPreviewPPT] = useState(null); // PPT预览状态
   const [previewPage, setPreviewPage] = useState(0); // 当前预览页码
+  const [videoProjects, setVideoProjects] = useState([
+    {
+      id: 101,
+      title: '新品发布品牌短片',
+      status: 'ready',
+      duration: '45秒',
+      ratio: '16:9',
+      style: '科技电影感',
+      updatedAt: '刚刚同步',
+      prompt: '围绕 Ankki 数据安全平台升级发布，生成一支适合官网和大会暖场播放的品牌短片。',
+      outputs: ['横版成片', '口播字幕', '分镜脚本'],
+      scenes: [
+        { title: '开场钩子', seconds: '00-08s', visual: '城市夜景与数据流线条交错，品牌主色缓慢显现。', narration: '当数据成为企业增长引擎，安全就是最关键的护城河。' },
+        { title: '痛点场景', seconds: '08-18s', visual: '业务系统高速运转，风险告警在屏幕边缘闪现。', narration: '复杂业务协同之下，企业需要更实时、更稳定的数据保护能力。' },
+        { title: '产品亮相', seconds: '18-33s', visual: '平台 3D UI 演绎核心模块，突出审计、加密和风险联动。', narration: 'Ankki 新一代平台，以可视化、自动化和智能化重新定义数据安全。' },
+        { title: '价值收束', seconds: '33-45s', visual: '团队协作与客户成果镜头拼接，收尾落在品牌口号。', narration: '从治理到增长，让安全能力真正成为企业竞争力。' },
+      ],
+    },
+    {
+      id: 102,
+      title: '客户案例社媒短视频',
+      status: 'generating',
+      duration: '30秒',
+      ratio: '9:16',
+      style: '高节奏信息流',
+      updatedAt: '2分钟前',
+      prompt: '把客户成功案例改编成适合朋友圈和短视频渠道传播的竖版视频。',
+      outputs: ['竖版成片', '封面文案'],
+      scenes: [
+        { title: '案例标题', seconds: '00-06s', visual: '客户品牌 Logo 与数字化场景叠加出现。', narration: '某头部制造企业，如何用 60 天完成数据安全升级。' },
+        { title: '成果展示', seconds: '06-18s', visual: '核心数据指标数字翻牌，穿插业务现场镜头。', narration: '风险响应提速 70%，审计效率提升 3 倍。' },
+        { title: 'CTA', seconds: '18-30s', visual: '品牌收尾页与咨询二维码位置。', narration: '想复制同样的增长路径，现在就预约方案演示。' },
+      ],
+    },
+  ]);
+  const [selectedVideoProjectId, setSelectedVideoProjectId] = useState(101);
+  const [videoGenerating, setVideoGenerating] = useState(false);
+  const [videoError, setVideoError] = useState('');
+  const [pptProjects, setPptProjects] = useState([
+    {
+      id: 201,
+      title: '渠道伙伴大会方案',
+      status: 'ready',
+      pageCount: 14,
+      tone: '专业科技',
+      audience: '渠道伙伴 / 销售团队',
+      updatedAt: '10分钟前',
+      topic: '2026 渠道伙伴增长计划',
+      sections: ['会议背景', '市场机会', '政策升级', '激励机制', '行动节奏'],
+      slides: [
+        { title: '封面', layout: '品牌封面', summary: '大会主题、时间地点与视觉主 KV。' },
+        { title: '会议目标', layout: '目标拆解', summary: '明确拉新、转化、复购三项核心指标。' },
+        { title: '市场机会', layout: '数据图表', summary: '展示行业增长趋势和重点区域空白市场。' },
+        { title: '政策升级', layout: '左右对比', summary: '新旧合作政策对比与升级收益。' },
+        { title: '行动排期', layout: '路线图', summary: '按季度拆解招商、培训和联合营销动作。' },
+      ],
+    },
+    {
+      id: 202,
+      title: '季度经营汇报 Deck',
+      status: 'queued',
+      pageCount: 10,
+      tone: '极简商务',
+      audience: '经管会',
+      updatedAt: '排队中',
+      topic: '2026 Q1 经营复盘',
+      sections: ['经营摘要', '关键指标', '问题复盘', '下季计划'],
+      slides: [
+        { title: '经营摘要', layout: '标题 + 三卡片', summary: '一页完成结果概览与经营判断。' },
+        { title: '关键指标', layout: '图表墙', summary: '收入、成本、签约与回款指标联动呈现。' },
+        { title: '问题复盘', layout: '问题树', summary: '聚焦偏差原因和改进行动。' },
+      ],
+    },
+  ]);
+  const [selectedPptProjectId, setSelectedPptProjectId] = useState(201);
+  const [pptGenerating, setPptGenerating] = useState(false);
+  const [pptError, setPptError] = useState('');
+  const [pptExporting, setPptExporting] = useState(false);
+  const [pptExportError, setPptExportError] = useState('');
   
   // 主题配置 - Claude 风格
   const theme = darkMode ? {
@@ -82,6 +161,578 @@ export default function AnkkiDesignV2() {
     cardBg: '#ffffff',
     cardHover: '#faf9f7',
     tagBg: '#f5f4f2',
+  };
+
+  const getGenerationStatusMeta = (status) => {
+    const statusMap = {
+      ready: { label: '已生成', color: theme.success, bg: darkMode ? 'rgba(74, 222, 128, 0.12)' : 'rgba(34, 197, 94, 0.1)' },
+      generating: { label: '生成中', color: theme.warning, bg: darkMode ? 'rgba(251, 191, 36, 0.14)' : 'rgba(245, 158, 11, 0.12)' },
+      queued: { label: '排队中', color: theme.textSecondary, bg: theme.bgTertiary },
+    };
+    return statusMap[status] || statusMap.queued;
+  };
+
+  const callGenerationApi = async (path, payload) => {
+    const response = await fetch(path, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || '生成失败，请稍后再试。');
+    }
+
+    return data;
+  };
+
+  const downloadPptProject = async (project) => {
+    if (!project || pptExporting) return;
+
+    try {
+      setPptExporting(true);
+      setPptExportError('');
+
+      const response = await fetch('/api/export/pptx', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(project),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'PPT 导出失败，请稍后再试。');
+      }
+
+      const blob = await response.blob();
+      const fileName = decodeURIComponent(
+        response.headers
+          .get('content-disposition')
+          ?.match(/filename="(.+)"/)?.[1] || `${project.title || 'ankki-deck'}.pptx`
+      );
+
+      const downloadUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = downloadUrl;
+      anchor.download = fileName;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      setPptExportError(error.message);
+    } finally {
+      setPptExporting(false);
+    }
+  };
+
+  const renderCompleteTemplatePreview = (template) => {
+    const firstPage = template.previewPages?.[0];
+
+    return (
+      <div style={{
+        width: '100%',
+        height: '100%',
+        padding: 14,
+        color: '#fff',
+        background: `linear-gradient(135deg, ${firstPage?.color || '#1e40af'}, ${darkMode ? '#0f172a' : '#60a5fa'})`,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+      }}>
+        <div style={{ fontSize: 10, opacity: 0.72, letterSpacing: '0.6px' }}>{firstPage?.title || '封面'}</div>
+        <div>
+          <div style={{
+            fontSize: 22,
+            fontWeight: 700,
+            lineHeight: 1.25,
+            marginBottom: 8,
+            fontFamily: "'DM Sans', sans-serif",
+            whiteSpace: 'pre-line',
+          }}>
+            {firstPage?.content || template.name}
+          </div>
+          <div style={{
+            width: 54,
+            height: 4,
+            borderRadius: 999,
+            backgroundColor: 'rgba(255,255,255,0.72)',
+          }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, opacity: 0.72 }}>
+          <span>Ankki Design</span>
+          <span>{template.pages}P</span>
+        </div>
+      </div>
+    );
+  };
+
+  const renderSingleTemplatePreview = (template) => {
+    const preview = template.previewContent || {};
+    const baseStyle = {
+      width: '100%',
+      height: '100%',
+      padding: 12,
+      borderRadius: 0,
+      color: '#fff',
+      background: `linear-gradient(135deg, ${preview.color || '#1e40af'}, ${darkMode ? '#111827' : '#cbd5e1'})`,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      overflow: 'hidden',
+    };
+
+    if (template.type === 'cover') {
+      return (
+        <div style={baseStyle}>
+          <div style={{ fontSize: 9, opacity: 0.74 }}>Ankki Deck</div>
+          <div>
+            <div style={{
+              fontSize: 18,
+              fontWeight: 700,
+              lineHeight: 1.25,
+              marginBottom: 8,
+              fontFamily: "'DM Sans', sans-serif",
+              whiteSpace: 'pre-line',
+            }}>
+              {preview.title}
+            </div>
+            <div style={{ fontSize: 10, opacity: 0.82 }}>{preview.subtitle}</div>
+          </div>
+          <div style={{ width: 42, height: 3, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.7)' }} />
+        </div>
+      );
+    }
+
+    if (template.type === 'paragraph') {
+      return (
+        <div style={baseStyle}>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>{preview.title}</div>
+          <div style={{
+            fontSize: 9,
+            lineHeight: 1.6,
+            opacity: 0.92,
+            whiteSpace: 'pre-line',
+            display: '-webkit-box',
+            WebkitLineClamp: 5,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}>
+            {preview.content}
+          </div>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {[0, 1, 2].map(item => (
+              <span key={item} style={{ flex: 1, height: 3, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.32)' }} />
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    if (template.type === 'image') {
+      return (
+        <div style={{ ...baseStyle, flexDirection: 'row', gap: 10, alignItems: 'stretch' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: 12, fontWeight: 600, lineHeight: 1.4 }}>{preview.title}</div>
+            <div style={{ fontSize: 9, lineHeight: 1.5, opacity: 0.82 }}>{preview.content}</div>
+          </div>
+          <div style={{
+            width: 46,
+            borderRadius: 10,
+            backgroundColor: 'rgba(255,255,255,0.16)',
+            border: '1px solid rgba(255,255,255,0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 18,
+          }}>
+            ▣
+          </div>
+        </div>
+      );
+    }
+
+    if (template.type === 'logic') {
+      return (
+        <div style={baseStyle}>
+          <div style={{ fontSize: 12, fontWeight: 600 }}>{preview.title}</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+            {[0, 1, 2].map(item => (
+              <React.Fragment key={item}>
+                <div style={{
+                  width: 18,
+                  height: 18,
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255,255,255,0.24)',
+                  border: '1px solid rgba(255,255,255,0.35)',
+                }} />
+                {item < 2 && <div style={{ flex: 1, height: 2, backgroundColor: 'rgba(255,255,255,0.28)' }} />}
+              </React.Fragment>
+            ))}
+          </div>
+          <div style={{ fontSize: 9, lineHeight: 1.5, opacity: 0.86, whiteSpace: 'pre-line' }}>{preview.content}</div>
+        </div>
+      );
+    }
+
+    return (
+      <div style={baseStyle}>
+        <div style={{ fontSize: 12, fontWeight: 600 }}>{preview.title}</div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 40 }}>
+          {[18, 30, 22, 34].map((height, index) => (
+            <div
+              key={height}
+              style={{
+                flex: 1,
+                height,
+                borderRadius: '6px 6px 2px 2px',
+                backgroundColor: ['#34d399', '#fbbf24', '#60a5fa', '#f87171'][index],
+              }}
+            />
+          ))}
+        </div>
+        <div style={{ fontSize: 9, lineHeight: 1.5, opacity: 0.86, whiteSpace: 'pre-line' }}>{preview.content}</div>
+      </div>
+    );
+  };
+
+  const renderAssetPreview = (asset, options = {}) => {
+    const { compact = false, statusBadge = true } = options;
+    const previewHeight = compact ? 44 : 140;
+    const baseRadius = compact ? 10 : 0;
+    const labelStyle = {
+      fontSize: compact ? 8 : 10,
+      opacity: 0.72,
+      letterSpacing: '0.5px',
+    };
+
+    const wrap = (children, background) => (
+      <div style={{
+        width: '100%',
+        height: previewHeight,
+        borderRadius: baseRadius,
+        background,
+        overflow: 'hidden',
+        position: 'relative',
+      }}>
+        {children}
+        {statusBadge && !compact && (
+          <span style={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            fontSize: 10,
+            fontWeight: 600,
+            color: '#fff',
+            backgroundColor: asset.status === 'approved' ? theme.success : theme.warning,
+            padding: '3px 8px',
+            borderRadius: 4,
+          }}>
+            {asset.status === 'approved' ? '已发布' : '待审核'}
+          </span>
+        )}
+      </div>
+    );
+
+    if (asset.pdfPreview?.pages?.length) {
+      const firstPage = asset.pdfPreview.pages[0];
+      return wrap(
+        <div style={{
+          height: '100%',
+          padding: compact ? 8 : 16,
+          background: darkMode ? '#f8fafc' : '#ffffff',
+          color: '#0f172a',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          border: `1px solid ${darkMode ? '#334155' : '#e2e8f0'}`,
+        }}>
+          <div style={{ ...labelStyle, color: '#dc2626', opacity: 1 }}>PDF DOCUMENT</div>
+          <div>
+            <div style={{
+              fontSize: compact ? 9 : 18,
+              fontWeight: 700,
+              lineHeight: 1.3,
+              whiteSpace: 'pre-line',
+              marginBottom: compact ? 4 : 10,
+              fontFamily: "'DM Sans', sans-serif",
+            }}>
+              {firstPage.content}
+            </div>
+            <div style={{ fontSize: compact ? 7 : 11, color: '#64748b' }}>{asset.name}</div>
+          </div>
+          {!compact && <div style={{ width: 56, height: 4, backgroundColor: '#dc2626', borderRadius: 999 }} />}
+        </div>,
+        darkMode ? '#111827' : '#e2e8f0'
+      );
+    }
+
+    if (asset.wordPreview?.sections?.length) {
+      const firstSection = asset.wordPreview.sections[0];
+      return wrap(
+        <div style={{
+          height: '100%',
+          padding: compact ? 8 : 16,
+          background: darkMode ? '#f8fafc' : '#ffffff',
+          color: '#0f172a',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          border: `1px solid ${darkMode ? '#334155' : '#e2e8f0'}`,
+        }}>
+          <div style={{ ...labelStyle, color: '#2563eb', opacity: 1 }}>DOCX FILE</div>
+          <div>
+            <div style={{
+              fontSize: compact ? 9 : 17,
+              fontWeight: 700,
+              lineHeight: 1.35,
+              marginBottom: compact ? 4 : 8,
+            }}>
+              {asset.wordPreview.title}
+            </div>
+            <div style={{
+              fontSize: compact ? 7 : 11,
+              color: '#475569',
+              lineHeight: 1.55,
+              display: '-webkit-box',
+              WebkitLineClamp: compact ? 2 : 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}>
+              {firstSection.content}
+            </div>
+          </div>
+          {!compact && <div style={{ width: 64, height: 4, backgroundColor: '#2563eb', borderRadius: 999 }} />}
+        </div>,
+        darkMode ? '#0f172a' : '#dbeafe'
+      );
+    }
+
+    if (asset.pptPreview?.slides?.length) {
+      const firstSlide = asset.pptPreview.slides[0];
+      return wrap(
+        <div style={{
+          height: '100%',
+          padding: compact ? 8 : 16,
+          color: '#fff',
+          background: `linear-gradient(135deg, ${firstSlide.color}, ${darkMode ? '#0f172a' : '#93c5fd'})`,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+        }}>
+          <div style={labelStyle}>SLIDE 01</div>
+          <div style={{
+            fontSize: compact ? 9 : 19,
+            fontWeight: 700,
+            lineHeight: 1.28,
+            whiteSpace: 'pre-line',
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
+            {firstSlide.content}
+          </div>
+          {!compact && <div style={{ fontSize: 11, opacity: 0.76 }}>{asset.pptPreview.totalSlides} 页演示文稿</div>}
+        </div>,
+        firstSlide.color
+      );
+    }
+
+    if (asset.excelData?.headers?.length) {
+      return wrap(
+        <div style={{
+          height: '100%',
+          padding: compact ? 8 : 12,
+          background: darkMode ? '#0f172a' : '#ecfdf5',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: compact ? 3 : 6,
+        }}>
+          <div style={{ ...labelStyle, color: '#047857', opacity: 1 }}>XLSX TABLE</div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${Math.min(asset.excelData.headers.length, compact ? 3 : 4)}, 1fr)`,
+            gap: 4,
+          }}>
+            {asset.excelData.headers.slice(0, compact ? 3 : 4).map(header => (
+              <div key={header} style={{
+                padding: compact ? '3px 4px' : '4px 6px',
+                borderRadius: 4,
+                backgroundColor: '#047857',
+                color: '#fff',
+                fontSize: compact ? 6 : 9,
+                fontWeight: 600,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {header}
+              </div>
+            ))}
+          </div>
+          {asset.excelData.rows.slice(0, compact ? 2 : 3).map((row, index) => (
+            <div key={`${asset.id}-row-${index}`} style={{
+              display: 'grid',
+              gridTemplateColumns: `repeat(${Math.min(row.length, compact ? 3 : 4)}, 1fr)`,
+              gap: 4,
+            }}>
+              {row.slice(0, compact ? 3 : 4).map((cell, cellIndex) => (
+                <div key={`${asset.id}-cell-${index}-${cellIndex}`} style={{
+                  padding: compact ? '2px 4px' : '4px 6px',
+                  borderRadius: 4,
+                  backgroundColor: darkMode ? '#1f2937' : '#ffffff',
+                  color: darkMode ? '#e5e7eb' : '#334155',
+                  fontSize: compact ? 6 : 8.5,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {cell}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>,
+        darkMode ? '#064e3b' : '#d1fae5'
+      );
+    }
+
+    if (asset.imagePreview?.colors?.length) {
+      return wrap(
+        <div style={{
+          height: '100%',
+          display: 'grid',
+          gridTemplateColumns: `repeat(${asset.imagePreview.colors.length}, 1fr)`,
+        }}>
+          {asset.imagePreview.colors.map(color => (
+            <div key={color.hex} style={{ backgroundColor: color.hex }} />
+          ))}
+        </div>,
+        darkMode ? '#111827' : '#f8fafc'
+      );
+    }
+
+    if (asset.svgPreview?.variants?.length) {
+      return wrap(
+        <div style={{
+          height: '100%',
+          display: 'grid',
+          gridTemplateColumns: `repeat(${compact ? 2 : 3}, 1fr)`,
+          gap: compact ? 4 : 8,
+          padding: compact ? 6 : 10,
+          backgroundColor: darkMode ? '#111827' : '#f8fafc',
+        }}>
+          {asset.svgPreview.variants.slice(0, compact ? 2 : 3).map(variant => (
+            <div key={variant.name} style={{
+              borderRadius: compact ? 6 : 8,
+              backgroundColor: variant.bg,
+              border: '1px solid rgba(148,163,184,0.25)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: variant.color,
+              fontWeight: 700,
+              fontSize: compact ? 8 : 12,
+            }}>
+              A
+            </div>
+          ))}
+        </div>,
+        darkMode ? '#111827' : '#f8fafc'
+      );
+    }
+
+    if (asset.zipPreview?.files?.length) {
+      return wrap(
+        <div style={{
+          height: '100%',
+          padding: compact ? 8 : 14,
+          background: darkMode ? '#1e1b4b' : '#eef2ff',
+          color: darkMode ? '#e0e7ff' : '#312e81',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+        }}>
+          <div style={{ ...labelStyle, color: darkMode ? '#c4b5fd' : '#4338ca', opacity: 1 }}>ARCHIVE PACKAGE</div>
+          <div style={{
+            display: 'grid',
+            gap: compact ? 3 : 5,
+          }}>
+            {asset.zipPreview.files.slice(0, compact ? 2 : 4).map(file => (
+              <div key={file.name} style={{
+                padding: compact ? '3px 5px' : '5px 8px',
+                borderRadius: 6,
+                backgroundColor: 'rgba(255,255,255,0.55)',
+                fontSize: compact ? 6 : 9,
+                color: '#312e81',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {file.name}
+              </div>
+            ))}
+          </div>
+          {!compact && <div style={{ fontSize: 10, opacity: 0.8 }}>共 {asset.zipPreview.totalFiles} 个文件</div>}
+        </div>,
+        darkMode ? '#312e81' : '#c7d2fe'
+      );
+    }
+
+    if (asset.imagePreview?.dimensions || asset.imagePreview?.description) {
+      return wrap(
+        <div style={{
+          height: '100%',
+          padding: compact ? 8 : 16,
+          background: `linear-gradient(135deg, ${darkMode ? '#1e293b' : '#dbeafe'}, ${darkMode ? '#0f172a' : '#f8fafc'})`,
+          color: darkMode ? '#e2e8f0' : '#0f172a',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+        }}>
+          <div style={labelStyle}>IMAGE COVER</div>
+          <div style={{
+            fontSize: compact ? 8 : 11,
+            lineHeight: 1.6,
+            display: '-webkit-box',
+            WebkitLineClamp: compact ? 2 : 4,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+          }}>
+            {asset.imagePreview.description || asset.name}
+          </div>
+          {!compact && <div style={{ fontSize: 10, opacity: 0.72 }}>{asset.imagePreview.dimensions || asset.imagePreview.colorMode}</div>}
+        </div>,
+        darkMode ? '#0f172a' : '#eff6ff'
+      );
+    }
+
+    return wrap(
+      <div style={{
+        height: '100%',
+        padding: compact ? 8 : 16,
+        background: `linear-gradient(135deg, ${theme.accent}, ${darkMode ? '#111827' : '#fde7db'})`,
+        color: '#fff',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+      }}>
+        <div style={labelStyle}>{asset.format}</div>
+        <div style={{
+          fontSize: compact ? 8 : 16,
+          fontWeight: 700,
+          lineHeight: 1.35,
+          fontFamily: "'DM Sans', sans-serif",
+        }}>
+          {asset.name}
+        </div>
+        {!compact && <div style={{ fontSize: 10, opacity: 0.76 }}>{asset.updatedBy}</div>}
+      </div>,
+      theme.accent
+    );
   };
 
   // PPT整套模板数据
@@ -497,6 +1148,234 @@ export default function AnkkiDesignV2() {
         ]
       }
     },
+    {
+      id: 11,
+      name: '昂楷科技解决方案总册',
+      type: 'document',
+      format: 'PDF',
+      size: '12.4 MB',
+      version: '3.0',
+      updatedAt: '2024-01-12',
+      updatedBy: '解决方案部',
+      category: 'guide',
+      downloads: 406,
+      thumbnail: '📘',
+      status: 'approved',
+      pdfPreview: {
+        totalPages: 36,
+        pages: [
+          { num: 1, title: '封面', content: '昂楷科技\n数据安全解决方案总册' },
+          { num: 2, title: '方案地图', content: '数据库审计\n数据脱敏\n运维安全\n风险预警' },
+          { num: 3, title: '行业场景', content: '金融、政务、能源、制造\n四大核心行业实践' },
+          { num: 4, title: '产品矩阵', content: '平台产品 + 行业方案 + 交付服务' },
+          { num: 5, title: '客户价值', content: '降低风险暴露\n提升合规效率\n缩短交付周期' },
+        ]
+      }
+    },
+    {
+      id: 12,
+      name: '数据库安全审计产品手册',
+      type: 'document',
+      format: 'PDF',
+      size: '9.6 MB',
+      version: '2.4',
+      updatedAt: '2024-01-11',
+      updatedBy: '产品市场部',
+      category: 'guide',
+      downloads: 332,
+      thumbnail: '📗',
+      status: 'approved',
+      pdfPreview: {
+        totalPages: 24,
+        pages: [
+          { num: 1, title: '封面', content: '数据库安全审计\n产品手册' },
+          { num: 2, title: '产品定位', content: '面向核心数据库资产的\n访问审计与风险识别平台' },
+          { num: 3, title: '核心能力', content: 'SQL 审计\n账号画像\n异常告警\n行为回溯' },
+          { num: 4, title: '部署方式', content: '旁路审计 · 集群扩展\n支持国产化环境' },
+        ]
+      }
+    },
+    {
+      id: 13,
+      name: '央国企数据安全治理汇报模板',
+      type: 'presentation',
+      format: 'PPTX',
+      size: '7.8 MB',
+      version: '1.7',
+      updatedAt: '2024-01-09',
+      updatedBy: '售前团队',
+      category: 'template',
+      downloads: 267,
+      thumbnail: '📊',
+      status: 'approved',
+      pptPreview: {
+        totalSlides: 18,
+        slides: [
+          { num: 1, title: '封面', content: '央国企数据安全治理\n年度汇报', color: '#1e3a8a' },
+          { num: 2, title: '治理背景', content: '政策趋严 · 资产复杂 · 审计提级', color: '#1d4ed8' },
+          { num: 3, title: '建设目标', content: '统一视图\n分级分域\n持续运营', color: '#2563eb' },
+          { num: 4, title: '实施路径', content: '制度梳理\n平台建设\n运营闭环', color: '#1e40af' },
+        ]
+      }
+    },
+    {
+      id: 14,
+      name: '合作伙伴赋能训练营 Deck',
+      type: 'presentation',
+      format: 'PPTX',
+      size: '6.1 MB',
+      version: '1.3',
+      updatedAt: '2024-01-07',
+      updatedBy: '渠道运营',
+      category: 'template',
+      downloads: 148,
+      thumbnail: '📙',
+      status: 'approved',
+      pptPreview: {
+        totalSlides: 22,
+        slides: [
+          { num: 1, title: '封面', content: '昂楷合作伙伴训练营', color: '#0f766e' },
+          { num: 2, title: '伙伴价值', content: '产品赋能 · 售前支撑 · 市场共创', color: '#059669' },
+          { num: 3, title: '销售打法', content: '商机识别\n客户画像\n方案落单', color: '#10b981' },
+          { num: 4, title: '激励政策', content: '返点政策\n认证体系\n联合营销', color: '#047857' },
+        ]
+      }
+    },
+    {
+      id: 15,
+      name: '客户成功案例集',
+      type: 'document',
+      format: 'DOCX',
+      size: '4.1 MB',
+      version: '1.6',
+      updatedAt: '2024-01-13',
+      updatedBy: '市场部',
+      category: 'internal',
+      downloads: 219,
+      thumbnail: '📄',
+      status: 'approved',
+      wordPreview: {
+        title: '昂楷科技客户成功案例集',
+        totalPages: 26,
+        sections: [
+          { title: '案例一 金融行业', content: '某股份制银行通过昂楷数据库审计平台，实现关键 SQL 行为可视、异常操作及时告警，审计闭环效率提升 68%。' },
+          { title: '案例二 制造行业', content: '某制造集团完成多厂区数据库纳管，建立统一策略模板，支撑跨区域审计联动与集团级报表汇总。' },
+          { title: '案例三 政务行业', content: '在政务云项目中完成国产数据库环境兼容适配，满足监管检查和等保合规要求。' },
+        ]
+      }
+    },
+    {
+      id: 16,
+      name: '售前项目立项模板',
+      type: 'document',
+      format: 'DOCX',
+      size: '2.7 MB',
+      version: '2.1',
+      updatedAt: '2024-01-14',
+      updatedBy: '售前管理组',
+      category: 'template',
+      downloads: 173,
+      thumbnail: '📄',
+      status: 'approved',
+      wordPreview: {
+        title: '售前项目立项模板',
+        totalPages: 14,
+        sections: [
+          { title: '项目概述', content: '记录客户背景、项目目标、关键时间节点和参与角色，帮助团队快速完成项目立项。' },
+          { title: '机会评估', content: '包含预算判断、竞争格局、风险项与赢单动作，适配解决方案型销售场景。' },
+          { title: '资源申请', content: '用于申请售前、研发、交付、市场等跨部门资源支持。' },
+        ]
+      }
+    },
+    {
+      id: 17,
+      name: '品牌海报主视觉合集',
+      type: 'image',
+      format: 'JPG',
+      size: '16.8 MB',
+      version: '1.9',
+      updatedAt: '2024-01-15',
+      updatedBy: '品牌设计组',
+      category: 'marketing',
+      downloads: 388,
+      thumbnail: '🖼️',
+      status: 'approved',
+      imagePreview: {
+        dimensions: '4961 x 3508',
+        description: '包含新品发布、年度峰会、客户案例和渠道招募等 12 张主视觉海报，可用于官网、会场与社媒传播。',
+        colorMode: 'CMYK / RGB',
+      }
+    },
+    {
+      id: 18,
+      name: '招投标资质文件包',
+      type: 'archive',
+      format: 'ZIP',
+      size: '58.4 MB',
+      version: '4.2',
+      updatedAt: '2024-01-15',
+      updatedBy: '商务支持',
+      category: 'internal',
+      downloads: 92,
+      thumbnail: '📦',
+      status: 'approved',
+      zipPreview: {
+        totalFiles: 42,
+        files: [
+          { name: '营业执照.pdf', size: '1.1 MB', type: 'document' },
+          { name: '高新技术企业证书.pdf', size: '2.0 MB', type: 'document' },
+          { name: 'ISO27001认证.pdf', size: '1.6 MB', type: 'document' },
+          { name: '典型案例清单.docx', size: '0.4 MB', type: 'document' },
+        ]
+      }
+    },
+    {
+      id: 19,
+      name: '行业线索周报数据表',
+      type: 'spreadsheet',
+      format: 'XLSX',
+      size: '1.9 MB',
+      version: '1.1',
+      updatedAt: '2024-01-15',
+      updatedBy: '市场运营',
+      category: 'internal',
+      downloads: 141,
+      thumbnail: '📈',
+      status: 'approved',
+      excelData: {
+        sheetName: '线索周报',
+        headers: ['行业', '新增线索', '有效商机', '转方案', '赢单率'],
+        rows: [
+          ['金融', '36', '18', '9', '22%'],
+          ['制造', '28', '14', '7', '18%'],
+          ['政务', '22', '10', '5', '16%'],
+          ['能源', '16', '8', '4', '19%'],
+        ]
+      }
+    },
+    {
+      id: 20,
+      name: '昂楷科技品牌应用规范',
+      type: 'document',
+      format: 'PDF',
+      size: '14.2 MB',
+      version: '3.5',
+      updatedAt: '2024-01-16',
+      updatedBy: '品牌中心',
+      category: 'brand',
+      downloads: 512,
+      thumbnail: '📕',
+      status: 'approved',
+      pdfPreview: {
+        totalPages: 42,
+        pages: [
+          { num: 1, title: '封面', content: '昂楷科技\n品牌应用规范' },
+          { num: 2, title: '品牌基调', content: '专业 · 稳健 · 技术可信赖' },
+          { num: 3, title: 'Logo 规范', content: '标准比例、保护区与错误示范' },
+          { num: 4, title: '版式系统', content: '封面、海报、展板和演示文稿规范' },
+        ]
+      }
+    },
   ];
 
   const categories = [
@@ -583,6 +1462,8 @@ export default function AnkkiDesignV2() {
             { id: 'dashboard', name: '工作台', icon: Grid, show: true },
             { id: 'assets', name: '素材库', icon: FolderOpen, show: true },
             { id: 'upload', name: '上传素材', icon: Upload, show: isAdmin },
+            { id: 'ai-video', name: 'AI视频生成', icon: Play, show: true },
+            { id: 'ai-ppt', name: 'PPT生成', icon: Presentation, show: true },
             { id: 'feedback', name: '功能反馈', icon: MessageSquare, show: true },
           ].filter(item => item.show).map(item => (
             <button
@@ -1095,12 +1976,9 @@ export default function AnkkiDesignV2() {
                   position: 'relative',
                   height: 160,
                   background: `linear-gradient(135deg, ${darkMode ? '#2a3f5f' : '#e8f4fc'}, ${darkMode ? '#1e3a5f' : '#d1e9f6'})`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
                   overflow: 'hidden',
                 }}>
-                  <span style={{ fontSize: 48 }}>{template.thumbnail}</span>
+                  {renderCompleteTemplatePreview(template)}
                   {template.tag && (
                     <span style={{
                       position: 'absolute',
@@ -1232,12 +2110,9 @@ export default function AnkkiDesignV2() {
                   position: 'relative',
                   height: 120,
                   background: `linear-gradient(135deg, ${darkMode ? '#2d3748' : '#f0f4f8'}, ${darkMode ? '#1a202c' : '#e2e8f0'})`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
                   overflow: 'hidden',
                 }}>
-                  <span style={{ fontSize: 36 }}>{template.thumbnail}</span>
+                  {renderSingleTemplatePreview(template)}
                   <span style={{
                     position: 'absolute',
                     bottom: 6,
@@ -1428,12 +2303,9 @@ export default function AnkkiDesignV2() {
                     width: 44,
                     height: 44,
                     borderRadius: 10,
-                    backgroundColor: theme.bgTertiary,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 20,
-                  }}>{asset.thumbnail}</div>
+                    overflow: 'hidden',
+                    border: `1px solid ${theme.border}`,
+                  }}>{renderAssetPreview(asset, { compact: true, statusBadge: false })}</div>
                   <div>
                     <div style={{ fontSize: 14, fontWeight: 500, color: theme.text, marginBottom: 4 }}>{asset.name}</div>
                     <div style={{ fontSize: 12, color: theme.textMuted, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1475,7 +2347,16 @@ export default function AnkkiDesignV2() {
                 alignItems: 'center',
                 gap: 12,
               }}>
-                <span style={{ fontSize: 24 }}>{template.thumbnail}</span>
+                <div style={{
+                  width: 56,
+                  height: 36,
+                  borderRadius: 8,
+                  overflow: 'hidden',
+                  border: `1px solid ${theme.border}`,
+                  flexShrink: 0,
+                }}>
+                  {renderCompleteTemplatePreview(template)}
+                </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, color: theme.text, fontWeight: 500, marginBottom: 2 }}>{template.name.substring(0, 15)}...</div>
                   <div style={{ fontSize: 11, color: theme.textMuted }}>{template.views}人阅读</div>
@@ -1664,27 +2545,10 @@ export default function AnkkiDesignV2() {
           >
             <div style={{
               height: 140,
-              backgroundColor: theme.bgTertiary,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 48,
               position: 'relative',
+              overflow: 'hidden',
             }}>
-              {asset.thumbnail}
-              <span style={{
-                position: 'absolute',
-                top: 10,
-                right: 10,
-                fontSize: 10,
-                fontWeight: 600,
-                color: '#fff',
-                backgroundColor: asset.status === 'approved' ? theme.success : theme.warning,
-                padding: '3px 8px',
-                borderRadius: 4,
-              }}>
-                {asset.status === 'approved' ? '已发布' : '待审核'}
-              </span>
+              {renderAssetPreview(asset)}
             </div>
             <div style={{ padding: 16 }}>
               <div style={{ fontSize: 14, fontWeight: 500, color: theme.text, marginBottom: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{asset.name}</div>
@@ -2586,12 +3450,9 @@ export default function AnkkiDesignV2() {
                 width: 56,
                 height: 56,
                 borderRadius: 10,
-                backgroundColor: theme.bgTertiary,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 24,
-              }}>{asset.thumbnail}</div>
+                overflow: 'hidden',
+                border: `1px solid ${theme.border}`,
+              }}>{renderAssetPreview(asset, { compact: true, statusBadge: false })}</div>
               <div>
                 <div style={{ fontSize: 15, fontWeight: 500, color: theme.text, marginBottom: 4 }}>{asset.name}</div>
                 <div style={{ fontSize: 12, color: theme.textMuted }}>
@@ -2685,7 +3546,7 @@ export default function AnkkiDesignV2() {
         <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}` }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, color: theme.text }}>热门素材 TOP 5</h3>
         </div>
-        {assets.sort((a, b) => b.downloads - a.downloads).slice(0, 5).map((asset, i) => (
+        {[...assets].sort((a, b) => b.downloads - a.downloads).slice(0, 5).map((asset, i) => (
           <div key={asset.id} style={{
             padding: '16px 24px',
             display: 'flex',
@@ -2711,12 +3572,9 @@ export default function AnkkiDesignV2() {
                   width: 40,
                   height: 40,
                   borderRadius: 8,
-                  backgroundColor: theme.bgTertiary,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 18,
-                }}>{asset.thumbnail}</div>
+                  overflow: 'hidden',
+                  border: `1px solid ${theme.border}`,
+                }}>{renderAssetPreview(asset, { compact: true, statusBadge: false })}</div>
                 <span style={{ fontSize: 14, color: theme.text, fontWeight: 500 }}>{asset.name}</span>
               </div>
             </div>
@@ -3416,6 +4274,895 @@ export default function AnkkiDesignV2() {
   };
 
   // 渲染视图
+  const AIVideoView = () => {
+    const [videoForm, setVideoForm] = useState({
+      idea: '围绕 Ankki 数据安全平台升级，生成一支用于官网首屏与大会开场的品牌短片',
+      audience: '企业客户 / 合作伙伴',
+      highlight: '实时审计、风险联动、部署效率提升',
+      duration: '45秒',
+      ratio: '16:9',
+      style: '科技电影感',
+      voice: '专业旁白',
+    });
+
+    const activeVideoProject = videoProjects.find(item => item.id === selectedVideoProjectId) || videoProjects[0];
+    const videoPresets = [
+      { name: '品牌发布', values: { duration: '45秒', ratio: '16:9', style: '科技电影感', voice: '专业旁白' } },
+      { name: '短视频投放', values: { duration: '30秒', ratio: '9:16', style: '高节奏信息流', voice: '轻快女声' } },
+      { name: '案例访谈', values: { duration: '60秒', ratio: '16:9', style: '纪实访谈', voice: '沉稳男声' } },
+    ];
+
+    const createVideoProject = async () => {
+      if (!videoForm.idea.trim() || videoGenerating) return;
+
+      try {
+        setVideoGenerating(true);
+        setVideoError('');
+        const newProject = await callGenerationApi('/api/generate/video', videoForm);
+        setVideoProjects(prev => [newProject, ...prev]);
+        setSelectedVideoProjectId(newProject.id);
+      } catch (error) {
+        setVideoError(error.message);
+      } finally {
+        setVideoGenerating(false);
+      }
+    };
+
+    return (
+      <div style={{ padding: 28 }}>
+        <div style={{
+          padding: 28,
+          borderRadius: 18,
+          marginBottom: 24,
+          background: `linear-gradient(135deg, ${theme.accent}, #f19a77 55%, #f6c7a5 120%)`,
+          color: '#fff',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+          gap: 24,
+        }}>
+          <div style={{ maxWidth: 720 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.8px', opacity: 0.85, marginBottom: 12 }}>AI CONTENT STUDIO</div>
+            <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>AI 视频生成</h2>
+            <p style={{ fontSize: 15, lineHeight: 1.7, opacity: 0.92 }}>
+              输入主题、场景和传播目标，快速生成视频脚本、分镜节奏和交付建议，适合品牌发布、案例传播和社媒短片。
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            {[
+              { label: '本周生成', value: `${videoProjects.length + 6}` },
+              { label: '常用比例', value: '16:9 / 9:16' },
+              { label: '最快交付', value: '5 分钟' },
+            ].map(item => (
+              <div key={item.label} style={{
+                minWidth: 120,
+                padding: '14px 16px',
+                borderRadius: 12,
+                backgroundColor: 'rgba(255,255,255,0.14)',
+                backdropFilter: 'blur(8px)',
+              }}>
+                <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 6 }}>{item.label}</div>
+                <div style={{ fontSize: 20, fontWeight: 700 }}>{item.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 0.9fr', gap: 20, marginBottom: 24 }}>
+          <div style={{
+            backgroundColor: theme.cardBg,
+            borderRadius: 16,
+            border: `1px solid ${theme.border}`,
+            padding: 24,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div>
+                <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.text, marginBottom: 6 }}>生成参数</h3>
+                <p style={{ fontSize: 13, color: theme.textSecondary }}>先确定传播目标，再由系统自动生成脚本与分镜建议。</p>
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                {videoPresets.map(preset => (
+                  <button
+                    key={preset.name}
+                    onClick={() => setVideoForm(prev => ({ ...prev, ...preset.values }))}
+                    style={{
+                      padding: '7px 12px',
+                      fontSize: 12,
+                      backgroundColor: theme.bgTertiary,
+                      color: theme.textSecondary,
+                      border: `1px solid ${theme.border}`,
+                      borderRadius: 999,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {preset.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: theme.text, marginBottom: 8 }}>视频主题</label>
+              <textarea
+                value={videoForm.idea}
+                onChange={(e) => setVideoForm(prev => ({ ...prev, idea: e.target.value }))}
+                rows={4}
+                style={{
+                  width: '100%',
+                  padding: '14px 16px',
+                  borderRadius: 10,
+                  border: `1px solid ${theme.border}`,
+                  backgroundColor: theme.bg,
+                  color: theme.text,
+                  outline: 'none',
+                  resize: 'vertical',
+                  lineHeight: 1.6,
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 18 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: theme.text, marginBottom: 8 }}>目标受众</label>
+                <input
+                  type="text"
+                  value={videoForm.audience}
+                  onChange={(e) => setVideoForm(prev => ({ ...prev, audience: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    borderRadius: 10,
+                    border: `1px solid ${theme.border}`,
+                    backgroundColor: theme.bg,
+                    color: theme.text,
+                    outline: 'none',
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: theme.text, marginBottom: 8 }}>核心卖点</label>
+                <input
+                  type="text"
+                  value={videoForm.highlight}
+                  onChange={(e) => setVideoForm(prev => ({ ...prev, highlight: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    borderRadius: 10,
+                    border: `1px solid ${theme.border}`,
+                    backgroundColor: theme.bg,
+                    color: theme.text,
+                    outline: 'none',
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+              {[
+                { key: 'duration', label: '时长', options: ['30秒', '45秒', '60秒'] },
+                { key: 'ratio', label: '比例', options: ['16:9', '9:16', '1:1'] },
+                { key: 'style', label: '风格', options: ['科技电影感', '高节奏信息流', '纪实访谈'] },
+                { key: 'voice', label: '旁白', options: ['专业旁白', '轻快女声', '沉稳男声'] },
+              ].map(field => (
+                <div key={field.key}>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: theme.text, marginBottom: 8 }}>{field.label}</label>
+                  <select
+                    value={videoForm[field.key]}
+                    onChange={(e) => setVideoForm(prev => ({ ...prev, [field.key]: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: 10,
+                      border: `1px solid ${theme.border}`,
+                      backgroundColor: theme.bg,
+                      color: theme.text,
+                      outline: 'none',
+                    }}
+                  >
+                    {field.options.map(option => <option key={option} value={option}>{option}</option>)}
+                  </select>
+                </div>
+              ))}
+            </div>
+
+            {videoError && (
+              <div style={{
+                marginBottom: 16,
+                padding: '12px 14px',
+                borderRadius: 10,
+                backgroundColor: darkMode ? 'rgba(239, 68, 68, 0.12)' : 'rgba(239, 68, 68, 0.08)',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+                color: '#ef4444',
+                fontSize: 13,
+                lineHeight: 1.6,
+              }}>
+                {videoError}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+              <button
+                onClick={createVideoProject}
+                disabled={!videoForm.idea.trim() || videoGenerating}
+                style={{
+                  padding: '12px 20px',
+                  borderRadius: 10,
+                  border: 'none',
+                  backgroundColor: !videoForm.idea.trim() || videoGenerating ? theme.bgTertiary : theme.accent,
+                  color: '#fff',
+                  cursor: !videoForm.idea.trim() || videoGenerating ? 'not-allowed' : 'pointer',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <Play size={16} />
+                {videoGenerating ? '生成中...' : '立即生成'}
+              </button>
+              <button
+                style={{
+                  padding: '12px 20px',
+                  borderRadius: 10,
+                  border: `1px solid ${theme.border}`,
+                  backgroundColor: theme.bgTertiary,
+                  color: theme.textSecondary,
+                  cursor: 'pointer',
+                  fontSize: 14,
+                  fontWeight: 500,
+                }}
+              >
+                保存为模板
+              </button>
+              <span style={{ fontSize: 12, color: theme.textMuted }}>
+                通过 `/api/generate/video` 调用本地 AI 服务，需在 `.env` 中配置可用密钥。
+              </span>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gap: 16 }}>
+            {[
+              { icon: Camera, title: '镜头建议', text: '根据主题自动拆出开场、痛点、解决方案和 CTA 节奏。', accentColor: '#2563eb' },
+              { icon: MessageSquare, title: '字幕口播', text: '自动输出适合配音与字幕同步的台词文案。', accentColor: '#0f766e' },
+              { icon: Download, title: '交付清单', text: '成片脚本、拍摄建议和发布素材可以一次整理。', accentColor: '#b45309' },
+            ].map(card => (
+              <div key={card.title} style={{
+                padding: 20,
+                borderRadius: 16,
+                backgroundColor: theme.cardBg,
+                border: `1px solid ${theme.border}`,
+              }}>
+                <div style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 12,
+                  backgroundColor: darkMode ? 'rgba(255,255,255,0.05)' : theme.bgTertiary,
+                  color: card.accentColor,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 14,
+                }}>
+                  <card.icon size={20} />
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: theme.text, marginBottom: 8 }}>{card.title}</div>
+                <div style={{ fontSize: 13, lineHeight: 1.7, color: theme.textSecondary }}>{card.text}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 20 }}>
+          <div style={{
+            backgroundColor: theme.cardBg,
+            borderRadius: 16,
+            border: `1px solid ${theme.border}`,
+            overflow: 'hidden',
+          }}>
+            <div style={{ padding: '18px 20px', borderBottom: `1px solid ${theme.border}` }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: theme.text, marginBottom: 4 }}>生成记录</h3>
+              <p style={{ fontSize: 12, color: theme.textMuted }}>点击查看最近输出的脚本与分镜。</p>
+            </div>
+            <div style={{ padding: 12 }}>
+              {videoProjects.map(project => {
+                const statusMeta = getGenerationStatusMeta(project.status);
+                return (
+                  <button
+                    key={project.id}
+                    onClick={() => setSelectedVideoProjectId(project.id)}
+                    style={{
+                      width: '100%',
+                      padding: 14,
+                      marginBottom: 8,
+                      borderRadius: 12,
+                      border: selectedVideoProjectId === project.id ? `1px solid ${theme.accent}` : `1px solid transparent`,
+                      backgroundColor: selectedVideoProjectId === project.id ? theme.accentLight : theme.bgTertiary,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: selectedVideoProjectId === project.id ? theme.accent : theme.text }}>{project.title}</div>
+                      <span style={{ fontSize: 11, padding: '4px 8px', borderRadius: 999, backgroundColor: statusMeta.bg, color: statusMeta.color }}>
+                        {statusMeta.label}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 12, color: theme.textSecondary, marginBottom: 6 }}>{project.duration} · {project.ratio} · {project.style}</div>
+                    <div style={{ fontSize: 11, color: theme.textMuted }}>{project.updatedAt}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div style={{
+            backgroundColor: theme.cardBg,
+            borderRadius: 16,
+            border: `1px solid ${theme.border}`,
+            padding: 24,
+          }}>
+            {activeVideoProject && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, marginBottom: 20 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                      <h3 style={{ fontSize: 22, fontWeight: 600, color: theme.text }}>{activeVideoProject.title}</h3>
+                      <span style={{
+                        fontSize: 12,
+                        padding: '4px 10px',
+                        borderRadius: 999,
+                        backgroundColor: getGenerationStatusMeta(activeVideoProject.status).bg,
+                        color: getGenerationStatusMeta(activeVideoProject.status).color,
+                      }}>
+                        {getGenerationStatusMeta(activeVideoProject.status).label}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: 14, color: theme.textSecondary, lineHeight: 1.7, maxWidth: 780 }}>{activeVideoProject.prompt}</p>
+                  </div>
+                  <button style={{
+                    padding: '10px 16px',
+                    borderRadius: 10,
+                    border: `1px solid ${theme.border}`,
+                    backgroundColor: theme.bgTertiary,
+                    color: theme.textSecondary,
+                    cursor: 'pointer',
+                    fontSize: 13,
+                  }}>
+                    导出脚本
+                  </button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 22 }}>
+                  {[
+                    { label: '建议时长', value: activeVideoProject.duration },
+                    { label: '画面比例', value: activeVideoProject.ratio },
+                    { label: '产出文件', value: activeVideoProject.outputs.join(' / ') },
+                  ].map(item => (
+                    <div key={item.label} style={{
+                      padding: 16,
+                      borderRadius: 12,
+                      backgroundColor: theme.bgTertiary,
+                    }}>
+                      <div style={{ fontSize: 12, color: theme.textMuted, marginBottom: 6 }}>{item.label}</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: theme.text }}>{item.value}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ marginBottom: 12, fontSize: 15, fontWeight: 600, color: theme.text }}>分镜脚本</div>
+                <div style={{ display: 'grid', gap: 12 }}>
+                  {activeVideoProject.scenes.map(scene => (
+                    <div key={`${activeVideoProject.id}-${scene.title}`} style={{
+                      padding: 18,
+                      borderRadius: 14,
+                      border: `1px solid ${theme.border}`,
+                      backgroundColor: theme.bgSecondary,
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 10 }}>
+                        <div style={{ fontSize: 15, fontWeight: 600, color: theme.text }}>{scene.title}</div>
+                        <div style={{ fontSize: 12, color: theme.textMuted }}>{scene.seconds}</div>
+                      </div>
+                      <div style={{ fontSize: 13, color: theme.textSecondary, lineHeight: 1.7, marginBottom: 8 }}>
+                        <strong style={{ color: theme.text }}>画面：</strong>{scene.visual}
+                      </div>
+                      <div style={{ fontSize: 13, color: theme.textSecondary, lineHeight: 1.7 }}>
+                        <strong style={{ color: theme.text }}>口播：</strong>{scene.narration}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const AIPPTView = () => {
+    const [pptForm, setPptForm] = useState({
+      topic: '2026 渠道伙伴增长计划',
+      audience: '渠道伙伴 / 管理层',
+      goal: '方案提案',
+      pageCount: '12',
+      tone: '专业科技',
+      sectionsText: '行业趋势，产品价值，合作政策，联合营销，行动计划',
+    });
+
+    const activePptProject = pptProjects.find(item => item.id === selectedPptProjectId) || pptProjects[0];
+    const pptPresets = [
+      { name: '经营汇报', values: { goal: '经营汇报', tone: '极简商务', pageCount: '10' } },
+      { name: '客户提案', values: { goal: '解决方案提案', tone: '专业科技', pageCount: '12' } },
+      { name: '发布会方案', values: { goal: '大会演讲', tone: '品牌发布', pageCount: '16' } },
+    ];
+
+    const createPptProject = async () => {
+      if (!pptForm.topic.trim() || pptGenerating) return;
+
+      try {
+        setPptGenerating(true);
+        setPptError('');
+        const newProject = await callGenerationApi('/api/generate/ppt', pptForm);
+        setPptProjects(prev => [newProject, ...prev]);
+        setSelectedPptProjectId(newProject.id);
+      } catch (error) {
+        setPptError(error.message);
+      } finally {
+        setPptGenerating(false);
+      }
+    };
+
+    return (
+      <div style={{ padding: 28 }}>
+        <div style={{
+          padding: 28,
+          borderRadius: 18,
+          marginBottom: 24,
+          background: darkMode
+            ? 'linear-gradient(135deg, #1f3a8a, #0f766e 60%, #164e63 120%)'
+            : 'linear-gradient(135deg, #1d4ed8, #0f766e 58%, #67e8f9 120%)',
+          color: '#fff',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+          gap: 24,
+        }}>
+          <div style={{ maxWidth: 720 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.8px', opacity: 0.85, marginBottom: 12 }}>SMART DECK BUILDER</div>
+            <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>PPT 生成</h2>
+            <p style={{ fontSize: 15, lineHeight: 1.7, opacity: 0.92 }}>
+              输入演示主题、对象和页数目标，自动生成汇报结构、页面文案和版式建议，适用于经营汇报、方案提案和大会演讲。
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            {[
+              { label: '常见页数', value: '10-16页' },
+              { label: '默认产出', value: '目录 + 内容' },
+              { label: '最快成稿', value: '3 分钟' },
+            ].map(item => (
+              <div key={item.label} style={{
+                minWidth: 120,
+                padding: '14px 16px',
+                borderRadius: 12,
+                backgroundColor: 'rgba(255,255,255,0.14)',
+                backdropFilter: 'blur(8px)',
+              }}>
+                <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 6 }}>{item.label}</div>
+                <div style={{ fontSize: 20, fontWeight: 700 }}>{item.value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1.35fr 0.95fr', gap: 20, marginBottom: 24 }}>
+          <div style={{
+            backgroundColor: theme.cardBg,
+            borderRadius: 16,
+            border: `1px solid ${theme.border}`,
+            padding: 24,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div>
+                <h3 style={{ fontSize: 18, fontWeight: 600, color: theme.text, marginBottom: 6 }}>Deck 参数</h3>
+                <p style={{ fontSize: 13, color: theme.textSecondary }}>先确定演示目标，再生成结构和页面草稿。</p>
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                {pptPresets.map(preset => (
+                  <button
+                    key={preset.name}
+                    onClick={() => setPptForm(prev => ({ ...prev, ...preset.values }))}
+                    style={{
+                      padding: '7px 12px',
+                      fontSize: 12,
+                      backgroundColor: theme.bgTertiary,
+                      color: theme.textSecondary,
+                      border: `1px solid ${theme.border}`,
+                      borderRadius: 999,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {preset.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: theme.text, marginBottom: 8 }}>演示主题</label>
+              <input
+                type="text"
+                value={pptForm.topic}
+                onChange={(e) => setPptForm(prev => ({ ...prev, topic: e.target.value }))}
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  borderRadius: 10,
+                  border: `1px solid ${theme.border}`,
+                  backgroundColor: theme.bg,
+                  color: theme.text,
+                  outline: 'none',
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 18 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: theme.text, marginBottom: 8 }}>汇报对象</label>
+                <input
+                  type="text"
+                  value={pptForm.audience}
+                  onChange={(e) => setPptForm(prev => ({ ...prev, audience: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    borderRadius: 10,
+                    border: `1px solid ${theme.border}`,
+                    backgroundColor: theme.bg,
+                    color: theme.text,
+                    outline: 'none',
+                  }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: theme.text, marginBottom: 8 }}>目标类型</label>
+                <select
+                  value={pptForm.goal}
+                  onChange={(e) => setPptForm(prev => ({ ...prev, goal: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    borderRadius: 10,
+                    border: `1px solid ${theme.border}`,
+                    backgroundColor: theme.bg,
+                    color: theme.text,
+                    outline: 'none',
+                  }}
+                >
+                  {['方案提案', '经营汇报', '大会演讲', '项目复盘'].map(option => <option key={option} value={option}>{option}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: theme.text, marginBottom: 8 }}>目标页数</label>
+                <select
+                  value={pptForm.pageCount}
+                  onChange={(e) => setPptForm(prev => ({ ...prev, pageCount: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    borderRadius: 10,
+                    border: `1px solid ${theme.border}`,
+                    backgroundColor: theme.bg,
+                    color: theme.text,
+                    outline: 'none',
+                  }}
+                >
+                  {['8', '10', '12', '16', '20'].map(option => <option key={option} value={option}>{option} 页</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 16, marginBottom: 24 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: theme.text, marginBottom: 8 }}>视觉语气</label>
+                <select
+                  value={pptForm.tone}
+                  onChange={(e) => setPptForm(prev => ({ ...prev, tone: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    borderRadius: 10,
+                    border: `1px solid ${theme.border}`,
+                    backgroundColor: theme.bg,
+                    color: theme.text,
+                    outline: 'none',
+                  }}
+                >
+                  {['专业科技', '极简商务', '品牌发布', '创意提案'].map(option => <option key={option} value={option}>{option}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: theme.text, marginBottom: 8 }}>必含章节</label>
+                <textarea
+                  value={pptForm.sectionsText}
+                  onChange={(e) => setPptForm(prev => ({ ...prev, sectionsText: e.target.value }))}
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    borderRadius: 10,
+                    border: `1px solid ${theme.border}`,
+                    backgroundColor: theme.bg,
+                    color: theme.text,
+                    outline: 'none',
+                    resize: 'vertical',
+                    lineHeight: 1.6,
+                  }}
+                />
+              </div>
+            </div>
+
+            {pptError && (
+              <div style={{
+                marginBottom: 16,
+                padding: '12px 14px',
+                borderRadius: 10,
+                backgroundColor: darkMode ? 'rgba(239, 68, 68, 0.12)' : 'rgba(239, 68, 68, 0.08)',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+                color: '#ef4444',
+                fontSize: 13,
+                lineHeight: 1.6,
+              }}>
+                {pptError}
+              </div>
+            )}
+
+            {pptExportError && (
+              <div style={{
+                marginBottom: 16,
+                padding: '12px 14px',
+                borderRadius: 10,
+                backgroundColor: darkMode ? 'rgba(245, 158, 11, 0.14)' : 'rgba(245, 158, 11, 0.1)',
+                border: '1px solid rgba(245, 158, 11, 0.22)',
+                color: theme.warning,
+                fontSize: 13,
+                lineHeight: 1.6,
+              }}>
+                {pptExportError}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+              <button
+                onClick={createPptProject}
+                disabled={!pptForm.topic.trim() || pptGenerating}
+                style={{
+                  padding: '12px 20px',
+                  borderRadius: 10,
+                  border: 'none',
+                  backgroundColor: !pptForm.topic.trim() || pptGenerating ? theme.bgTertiary : theme.accent,
+                  color: '#fff',
+                  cursor: !pptForm.topic.trim() || pptGenerating ? 'not-allowed' : 'pointer',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <Presentation size={16} />
+                {pptGenerating ? '生成中...' : '生成 Deck'}
+              </button>
+              <button
+                onClick={() => downloadPptProject(activePptProject)}
+                style={{
+                  padding: '12px 20px',
+                  borderRadius: 10,
+                  border: `1px solid ${theme.border}`,
+                  backgroundColor: theme.bgTertiary,
+                  color: theme.textSecondary,
+                  cursor: activePptProject ? 'pointer' : 'not-allowed',
+                  fontSize: 14,
+                  fontWeight: 500,
+                }}
+              >
+                {pptExporting ? '正在导出...' : '下载 PPTX'}
+              </button>
+              <span style={{ fontSize: 12, color: theme.textMuted }}>
+                通过 `/api/generate/ppt` 返回结构化大纲，并可直接导出 `.pptx`。
+              </span>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gap: 16 }}>
+            {[
+              { icon: Layout, title: '自动结构化', text: '自动产出封面、目录、内容页和收尾页，先搭框架再补内容。', accentColor: '#1d4ed8' },
+              { icon: BarChart3, title: '页面节奏建议', text: '根据主题推荐图表页、案例页和结论页的占比。', accentColor: '#0f766e' },
+              { icon: FileText, title: '文案即页面', text: '为每页提供标题、要点和版式指引，方便设计师继续深化。', accentColor: '#b45309' },
+            ].map(card => (
+              <div key={card.title} style={{
+                padding: 20,
+                borderRadius: 16,
+                backgroundColor: theme.cardBg,
+                border: `1px solid ${theme.border}`,
+              }}>
+                <div style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 12,
+                  backgroundColor: darkMode ? 'rgba(255,255,255,0.05)' : theme.bgTertiary,
+                  color: card.accentColor,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 14,
+                }}>
+                  <card.icon size={20} />
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: theme.text, marginBottom: 8 }}>{card.title}</div>
+                <div style={{ fontSize: 13, lineHeight: 1.7, color: theme.textSecondary }}>{card.text}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 20 }}>
+          <div style={{
+            backgroundColor: theme.cardBg,
+            borderRadius: 16,
+            border: `1px solid ${theme.border}`,
+            overflow: 'hidden',
+          }}>
+            <div style={{ padding: '18px 20px', borderBottom: `1px solid ${theme.border}` }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, color: theme.text, marginBottom: 4 }}>Deck 历史</h3>
+              <p style={{ fontSize: 12, color: theme.textMuted }}>最近生成的主题与结构草稿。</p>
+            </div>
+            <div style={{ padding: 12 }}>
+              {pptProjects.map(project => {
+                const statusMeta = getGenerationStatusMeta(project.status);
+                return (
+                  <button
+                    key={project.id}
+                    onClick={() => setSelectedPptProjectId(project.id)}
+                    style={{
+                      width: '100%',
+                      padding: 14,
+                      marginBottom: 8,
+                      borderRadius: 12,
+                      border: selectedPptProjectId === project.id ? `1px solid ${theme.accent}` : `1px solid transparent`,
+                      backgroundColor: selectedPptProjectId === project.id ? theme.accentLight : theme.bgTertiary,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: selectedPptProjectId === project.id ? theme.accent : theme.text }}>{project.title}</div>
+                      <span style={{ fontSize: 11, padding: '4px 8px', borderRadius: 999, backgroundColor: statusMeta.bg, color: statusMeta.color }}>
+                        {statusMeta.label}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 12, color: theme.textSecondary, marginBottom: 6 }}>{project.pageCount} 页 · {project.tone}</div>
+                    <div style={{ fontSize: 11, color: theme.textMuted }}>{project.updatedAt}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div style={{
+            backgroundColor: theme.cardBg,
+            borderRadius: 16,
+            border: `1px solid ${theme.border}`,
+            padding: 24,
+          }}>
+            {activePptProject && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, marginBottom: 20 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                      <h3 style={{ fontSize: 22, fontWeight: 600, color: theme.text }}>{activePptProject.title}</h3>
+                      <span style={{
+                        fontSize: 12,
+                        padding: '4px 10px',
+                        borderRadius: 999,
+                        backgroundColor: getGenerationStatusMeta(activePptProject.status).bg,
+                        color: getGenerationStatusMeta(activePptProject.status).color,
+                      }}>
+                        {getGenerationStatusMeta(activePptProject.status).label}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: 14, color: theme.textSecondary, lineHeight: 1.7, maxWidth: 780 }}>
+                      主题：{activePptProject.topic}，面向 {activePptProject.audience}，当前建议使用 {activePptProject.tone} 风格完成 {activePptProject.pageCount} 页输出。
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => downloadPptProject(activePptProject)}
+                    style={{
+                    padding: '10px 16px',
+                    borderRadius: 10,
+                    border: `1px solid ${theme.border}`,
+                    backgroundColor: theme.bgTertiary,
+                    color: theme.textSecondary,
+                    cursor: 'pointer',
+                    fontSize: 13,
+                  }}>
+                    {pptExporting ? '导出中...' : '下载 PPTX'}
+                  </button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 22 }}>
+                  {[
+                    { label: '建议页数', value: `${activePptProject.pageCount} 页` },
+                    { label: '汇报对象', value: activePptProject.audience },
+                    { label: '核心章节', value: activePptProject.sections.join(' / ') || '自动生成' },
+                  ].map(item => (
+                    <div key={item.label} style={{
+                      padding: 16,
+                      borderRadius: 12,
+                      backgroundColor: theme.bgTertiary,
+                    }}>
+                      <div style={{ fontSize: 12, color: theme.textMuted, marginBottom: 6 }}>{item.label}</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: theme.text, lineHeight: 1.6 }}>{item.value}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ marginBottom: 12, fontSize: 15, fontWeight: 600, color: theme.text }}>页面草稿</div>
+                <div style={{ display: 'grid', gap: 12 }}>
+                  {activePptProject.slides.map((slide, index) => (
+                    <div key={`${activePptProject.id}-${slide.title}`} style={{
+                      display: 'grid',
+                      gridTemplateColumns: '72px 1fr',
+                      gap: 14,
+                      padding: 18,
+                      borderRadius: 14,
+                      border: `1px solid ${theme.border}`,
+                      backgroundColor: theme.bgSecondary,
+                    }}>
+                      <div style={{
+                        borderRadius: 12,
+                        background: index % 2 === 0
+                          ? `linear-gradient(135deg, ${theme.accent}, #f19a77)`
+                          : darkMode
+                            ? 'linear-gradient(135deg, #1d4ed8, #0f766e)'
+                            : 'linear-gradient(135deg, #1d4ed8, #38bdf8)',
+                        color: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 18,
+                        fontWeight: 700,
+                        fontFamily: "'DM Sans', sans-serif",
+                      }}>
+                        {index + 1}
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, marginBottom: 8 }}>
+                          <div style={{ fontSize: 15, fontWeight: 600, color: theme.text }}>{slide.title}</div>
+                          <span style={{
+                            fontSize: 11,
+                            padding: '4px 10px',
+                            borderRadius: 999,
+                            backgroundColor: theme.bgTertiary,
+                            color: theme.textSecondary,
+                          }}>
+                            {slide.layout}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 13, color: theme.textSecondary, lineHeight: 1.7 }}>{slide.summary}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // 功能反馈提交页面
   const FeedbackView = () => {
     const [feedbackType, setFeedbackType] = useState('feature');
@@ -3910,6 +5657,8 @@ export default function AnkkiDesignV2() {
       case 'dashboard': return <DashboardView />;
       case 'assets': return <AssetsView />;
       case 'upload': return <UploadView />;
+      case 'ai-video': return <AIVideoView />;
+      case 'ai-ppt': return <AIPPTView />;
       case 'ppt-templates': return <PPTTemplatesView />;
       case 'feedback': return <FeedbackView />;
       case 'admin-users': return <AdminUsersView />;

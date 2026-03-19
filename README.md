@@ -6,10 +6,29 @@
 # 1. 安装依赖
 npm install
 
-# 2. 启动开发服务器
+# 2. 配置环境变量
+cp .env.example .env
+
+# 3. 在 .env 中填入可用的 OpenAI 或 OpenAI 兼容接口密钥
+
+# 4. 启动前端 + 本地 AI 服务
 npm start
 
-# 3. 浏览器访问 http://localhost:3000
+# 5. 浏览器访问 http://localhost:3000
+```
+
+本地 AI 服务默认运行在 `http://localhost:3001`，前端会通过 `/api/generate/video` 和 `/api/generate/ppt` 调用它。
+
+如果 `3000` 已被占用，可以只改前端端口：
+
+```bash
+PORT=3002 npm start
+```
+
+如果你也想改本地 AI 服务端口，则使用：
+
+```bash
+API_PORT=3003 npm start
 ```
 
 ---

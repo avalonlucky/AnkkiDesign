@@ -3,16 +3,23 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "pptxgenjs": "^4.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "lucide-react": "^0.263.1"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "concurrently \"npm run server\" \"npm run start:client\"",
+    "start:client": "react-scripts start",
+    "server": "node server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+  },
+  "proxy": "http://localhost:3001",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   },
   "browserslist": {
     "production": [
