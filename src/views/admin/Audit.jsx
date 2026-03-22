@@ -1,15 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Check, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { assets as initialAssets } from '../../data/mockData';
 
 export default function AdminAudit() {
-  const { theme, darkMode } = useApp();
-
-  // Local state for audit items (status: pending → approved / rejected)
-  const [auditItems, setAuditItems] = useState(
-    initialAssets.slice(0, 8).map(a => ({ ...a, auditStatus: 'pending' }))
-  );
+  const { theme, darkMode, auditItems, setAuditItems } = useApp();
 
   const approve = (id) => setAuditItems(prev => prev.map(a => a.id === id ? { ...a, auditStatus: 'approved' } : a));
   const reject  = (id) => setAuditItems(prev => prev.map(a => a.id === id ? { ...a, auditStatus: 'rejected' } : a));

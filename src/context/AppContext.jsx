@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { initialVideoProjects, initialPptProjects } from '../data/mockData';
+import { initialVideoProjects, initialPptProjects, assets as initialAssets } from '../data/mockData';
 
 const AppContext = createContext(null);
 
@@ -33,6 +33,9 @@ export function AppProvider({ children }) {
   const [pptExporting, setPptExporting] = useState(false);
   const [pptExportError, setPptExportError] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [auditItems, setAuditItems] = useState(
+    initialAssets.slice(0, 8).map(a => ({ ...a, auditStatus: 'pending' }))
+  );
 
   const hasPermission = useCallback((permission) => {
     const permissions = {
@@ -107,6 +110,7 @@ export function AppProvider({ children }) {
       pptGenerating, setPptGenerating, pptError, setPptError,
       pptExporting, setPptExporting, pptExportError, setPptExportError,
       uploadOpen, setUploadOpen,
+      auditItems, setAuditItems,
       hasPermission, isSuperAdmin, isAdmin, theme, getGenerationStatusMeta,
       callGenerationApi, downloadPptProject,
     }}>

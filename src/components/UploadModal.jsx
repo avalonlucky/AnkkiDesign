@@ -3,7 +3,7 @@ import { Upload, X, Check } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function UploadModal() {
-  const { theme, darkMode, currentUser, isSuperAdmin, isAdmin, setUploadOpen } = useApp();
+  const { theme, darkMode, currentUser, isSuperAdmin, isAdmin, setUploadOpen, setAuditItems } = useApp();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [assetName, setAssetName] = useState('');
   const [mainCategory, setMainCategory] = useState('');
@@ -78,6 +78,22 @@ export default function UploadModal() {
       setTimeout(() => {
         setUploading(false);
         setUploadSuccess(true);
+        // 普通用户上传 → 加入审核队列
+        if (!isAdmin) {
+          const newItem = {
+            id: `upload-${Date.now()}`,
+            name: assetName,
+            format: selectedFiles[0]?.extension || '未知',
+            size: selectedFiles[0]?.size || '-',
+            version,
+            category: mainCategory,
+            subCategory,
+            updatedBy: currentUser.name,
+            updatedAt: new Date().toLocaleDateString('zh-CN'),
+            auditStatus: 'pending',
+          };
+          setAuditItems(prev => [newItem, ...prev]);
+        }
         setTimeout(() => {
           setUploadSuccess(false);
           setSelectedFiles([]); setAssetName(''); setMainCategory(''); setSubCategory(''); setVersion('1.0'); setDescription('');
