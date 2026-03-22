@@ -65,6 +65,7 @@ export const mapBrochure = (row) => ({
   description: row.description || '',
   fileUrl: row.file_url || null,
   fileName: row.file_name || null,
+  thumbnailUrl: row.thumbnail_url || null,
   previewPages: [{ label: '封面', bg: (row.gradient || ['#1478F0'])[0], title: row.title, sub: row.subtitle || '' }],
 });
 

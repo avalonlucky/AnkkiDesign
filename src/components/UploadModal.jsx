@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, X, Check } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { generatePdfThumbnail } from '../lib/pdfThumb';
 
 export default function UploadModal() {
   const { theme, darkMode, currentUser, isSuperAdmin, isAdmin, setUploadOpen, addAuditItem, addBrochure } = useApp();
@@ -12,6 +13,7 @@ export default function UploadModal() {
   const [description, setDescription] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [pdfThumbnail, setPdfThumbnail] = useState(null);
   const fileInputRef = React.useRef(null);
 
   const onClose = () => setUploadOpen(false);
@@ -50,19 +52,25 @@ export default function UploadModal() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const handleFileSelect = (e) => {
-    const files = Array.from(e.target.files);
+  const processFiles = async (files) => {
     const fileInfos = files.map(file => ({ file, name: file.name, size: formatFileSize(file.size), type: file.type, extension: file.name.split('.').pop().toUpperCase() }));
-    setSelectedFiles([...selectedFiles, ...fileInfos]);
+    setSelectedFiles(prev => [...prev, ...fileInfos]);
     if (!assetName && files.length > 0) setAssetName(files[0].name.replace(/\.[^/.]+$/, ''));
+    // Generate thumbnail from first PDF
+    const firstPdf = files.find(f => f.name.toLowerCase().endsWith('.pdf'));
+    if (firstPdf && !pdfThumbnail) {
+      const thumb = await generatePdfThumbnail(firstPdf);
+      if (thumb) setPdfThumbnail(thumb);
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    processFiles(Array.from(e.target.files));
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
-    const files = Array.from(e.dataTransfer.files);
-    const fileInfos = files.map(file => ({ file, name: file.name, size: formatFileSize(file.size), type: file.type, extension: file.name.split('.').pop().toUpperCase() }));
-    setSelectedFiles([...selectedFiles, ...fileInfos]);
-    if (!assetName && files.length > 0) setAssetName(files[0].name.replace(/\.[^/.]+$/, ''));
+    processFiles(Array.from(e.dataTransfer.files));
   };
 
   const removeFile = (index) => setSelectedFiles(selectedFiles.filter((_, i) => i !== index));
@@ -73,47 +81,45 @@ export default function UploadModal() {
   };
 
   const handleSubmit = async () => {
-    if (selectedFiles.length > 0 && assetName && mainCategory && subCategory) {
-      setUploading(true);
-      setTimeout(async () => {
-        setUploading(false);
-        setUploadSuccess(true);
-        if (isAdmin && mainCategory === 'brochure') {
-          // 管理员上传彩页 → 写入 Supabase brochures 表 + Storage
-          const subLabels = { 'company-intro': '公司介绍', 'product-single': '产品单页', 'solution': '解决方案', 'case-study': '案例集' };
-          const gradients = [['#1478F0','#0a4fa8'],['#7c3aed','#4c1d95'],['#0f766e','#134e4a'],['#be123c','#881337'],['#b45309','#78350f'],['#0369a1','#0c4a6e']];
-          const g = gradients[Math.floor(Math.random() * gradients.length)];
-          await addBrochure({
-            file: selectedFiles[0]?.file || null,
-            meta: {
-              title: assetName,
-              category: subLabels[subCategory] || subCategory,
-              gradient: g,
-              uploadedBy: currentUser.name,
-              size: selectedFiles[0]?.size || '-',
-              description: description || assetName,
-            },
-          });
-        } else if (!isAdmin) {
-          // 普通用户上传 → 写入 Supabase audit_items 表
-          await addAuditItem({
-            id: `upload-${Date.now()}`,
-            name: assetName,
-            format: selectedFiles[0]?.extension || '未知',
+    if (!selectedFiles.length || !assetName || !mainCategory || !subCategory) return;
+    setUploading(true);
+    try {
+      if (isAdmin && mainCategory === 'brochure') {
+        const subLabels = { 'company-intro': '公司介绍', 'product-single': '产品单页', 'solution': '解决方案', 'case-study': '案例集' };
+        const gradients = [['#1478F0','#0a4fa8'],['#7c3aed','#4c1d95'],['#0f766e','#134e4a'],['#be123c','#881337'],['#b45309','#78350f'],['#0369a1','#0c4a6e']];
+        const g = gradients[Math.floor(Math.random() * gradients.length)];
+        await addBrochure({
+          file: selectedFiles[0]?.file || null,
+          thumbnail: pdfThumbnail,
+          meta: {
+            title: assetName,
+            category: subLabels[subCategory] || subCategory,
+            gradient: g,
+            uploadedBy: currentUser.name,
             size: selectedFiles[0]?.size || '-',
-            version,
-            category: mainCategory,
-            subCategory,
-            updatedBy: currentUser.name,
-            updatedAt: new Date().toLocaleDateString('zh-CN'),
-            auditStatus: 'pending',
-          });
-        }
-        setTimeout(() => {
-          setUploadSuccess(false);
-          setSelectedFiles([]); setAssetName(''); setMainCategory(''); setSubCategory(''); setVersion('1.0'); setDescription('');
-        }, 3000);
-      }, 2000);
+            description: description || assetName,
+          },
+        });
+      } else if (!isAdmin) {
+        await addAuditItem({
+          id: `upload-${Date.now()}`,
+          name: assetName,
+          format: selectedFiles[0]?.extension || '未知',
+          size: selectedFiles[0]?.size || '-',
+          version,
+          category: mainCategory,
+          subCategory,
+          updatedBy: currentUser.name,
+          updatedAt: new Date().toLocaleDateString('zh-CN'),
+          auditStatus: 'pending',
+        });
+      }
+      setUploadSuccess(true);
+      setTimeout(() => setUploadOpen(false), 1200);
+    } catch (err) {
+      console.error('Upload error:', err);
+    } finally {
+      setUploading(false);
     }
   };
 

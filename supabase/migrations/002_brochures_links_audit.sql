@@ -15,6 +15,7 @@ create table if not exists brochures (
   description text,
   file_url text,
   file_name text,
+  thumbnail_url text,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

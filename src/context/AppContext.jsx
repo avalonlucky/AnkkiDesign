@@ -71,10 +71,11 @@ export function AppProvider({ children }) {
   }, []);
 
   // ── Brochure actions ──────────────────────────────────────────────────────
-  const addBrochure = useCallback(async ({ file, meta }) => {
+  const addBrochure = useCallback(async ({ file, thumbnail, meta }) => {
     const id = `b-${Date.now()}`;
     let fileUrl = null;
     let fileName = null;
+    let thumbnailUrl = thumbnail || null;
     if (file) {
       try {
         fileUrl = await uploadBrochurePDF(file, id);
@@ -85,7 +86,8 @@ export function AppProvider({ children }) {
         fileName = file.name;
       }
     }
-    const row = {
+    // Don't send large base64 thumbnails to DB — store locally only
+    const dbRow = {
       id,
       title: meta.title,
       subtitle: meta.title,
@@ -100,8 +102,14 @@ export function AppProvider({ children }) {
       file_url: fileUrl,
       file_name: fileName,
     };
-    const { data, error } = await dbInsertBrochure(row);
-    const newItem = data && !error ? mapBrochure(data) : mapBrochure(row);
+    let newItem;
+    try {
+      const { data, error } = await dbInsertBrochure(dbRow);
+      const mapped = data && !error ? mapBrochure(data) : mapBrochure(dbRow);
+      newItem = { ...mapped, thumbnailUrl };
+    } catch {
+      newItem = { ...mapBrochure(dbRow), thumbnailUrl };
+    }
     setBrochures(prev => [newItem, ...prev]);
     return newItem;
   }, []);

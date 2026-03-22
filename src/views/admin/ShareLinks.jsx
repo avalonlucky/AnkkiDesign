@@ -26,8 +26,7 @@ export function ShareLinkViewer({ link, brochure, onClose }) {
     if (unlocked && !link.password) {
       incrementShareLinkViews(link.id);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // eslint-disable-line
 
   const renderGate = () => {
     if (isDisabled) return (

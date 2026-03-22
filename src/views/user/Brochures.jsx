@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BookOpen, Eye, Link2, Upload, X, ChevronLeft, ChevronRight, Copy, Check, ExternalLink, Search, Download, Lock, Calendar } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ShareLinkViewer } from '../admin/ShareLinks';
+import { generatePdfThumbnail } from '../../lib/pdfThumb';
 
 const CATEGORIES = ['全部', '产品手册', '企业画册', '解决方案', '白皮书', '案例集'];
 
@@ -9,7 +10,18 @@ const CATEGORIES = ['全部', '产品手册', '企业画册', '解决方案', '�
 function BookCard({ brochure, isAdmin, onView, onShare }) {
   const { theme } = useApp();
   const [hovered, setHovered] = useState(false);
+  const [coverImg, setCoverImg] = useState(brochure.thumbnailUrl || null);
+  const attempted = useRef(false);
   const [g0, g1] = brochure.gradient;
+
+  // Generate thumbnail from fileUrl if no thumbnail yet
+  useEffect(() => {
+    if (coverImg || attempted.current || !brochure.fileUrl) return;
+    attempted.current = true;
+    generatePdfThumbnail(brochure.fileUrl).then(thumb => {
+      if (thumb) setCoverImg(thumb);
+    });
+  }, [brochure.fileUrl, brochure.thumbnailUrl]); // eslint-disable-line
 
   return (
     <div
@@ -20,24 +32,40 @@ function BookCard({ brochure, isAdmin, onView, onShare }) {
       {/* Cover */}
       <div
         onClick={() => onView(brochure)}
-        style={{ height: 200, background: `linear-gradient(160deg, ${g0}, ${g1})`, position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 16 }}
+        style={{
+          height: 200, position: 'relative',
+          background: coverImg ? 'none' : `linear-gradient(160deg, ${g0}, ${g1})`,
+          display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 16,
+        }}
       >
+        {/* PDF thumbnail image */}
+        {coverImg && (
+          <img
+            src={coverImg}
+            alt={brochure.title}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        )}
+        {/* Gradient overlay when using thumbnail so text is readable */}
+        {coverImg && (
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.55) 40%, transparent 100%)' }} />
+        )}
         {/* Category badge */}
-        <span style={{ position: 'absolute', top: 12, left: 12, fontSize: 10, fontWeight: 600, padding: '3px 8px', borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.2)', color: '#fff', backdropFilter: 'blur(4px)' }}>
+        <span style={{ position: 'absolute', top: 12, left: 12, fontSize: 10, fontWeight: 600, padding: '3px 8px', borderRadius: 4, backgroundColor: 'rgba(0,0,0,0.3)', color: '#fff', backdropFilter: 'blur(4px)', zIndex: 1 }}>
           {brochure.category}
         </span>
         {/* Page count */}
-        <span style={{ position: 'absolute', top: 12, right: 12, fontSize: 10, color: 'rgba(255,255,255,0.75)' }}>
-          {brochure.pages} 页
+        <span style={{ position: 'absolute', top: 12, right: 12, fontSize: 10, color: 'rgba(255,255,255,0.85)', zIndex: 1 }}>
+          {brochure.pages > 0 ? `${brochure.pages} 页` : ''}
         </span>
         {/* Title */}
-        <div style={{ color: '#fff' }}>
-          <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.3, marginBottom: 4, textShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>{brochure.title}</div>
-          <div style={{ fontSize: 11, opacity: 0.75 }}>{brochure.subtitle}</div>
+        <div style={{ color: '#fff', position: 'relative', zIndex: 1 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.3, marginBottom: 4, textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>{brochure.title}</div>
+          <div style={{ fontSize: 11, opacity: 0.8 }}>{brochure.subtitle}</div>
         </div>
         {/* Hover overlay */}
         {hovered && (
-          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+          <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, zIndex: 2 }}>
             <button onClick={(e) => { e.stopPropagation(); onView(brochure); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', backgroundColor: '#fff', color: '#1f2937', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
               <Eye size={14} /> 查看
             </button>
