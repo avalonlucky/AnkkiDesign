@@ -13,6 +13,7 @@ import AdminUsers from './views/admin/Users';
 import AdminAudit from './views/admin/Audit';
 import AdminStats from './views/admin/Stats';
 import AdminSettings from './views/admin/Settings';
+import AdminShareLinks from './views/admin/ShareLinks';
 
 function renderView(currentView) {
   switch (currentView) {
@@ -28,6 +29,7 @@ function renderView(currentView) {
     case 'admin-users': return <AdminUsers />;
     case 'admin-audit': return <AdminAudit />;
     case 'admin-feedback': return <FeedbackView />;
+    case 'admin-links': return <AdminShareLinks />;
     case 'admin-stats': return <AdminStats />;
     case 'admin-settings': return <AdminSettings />;
     default: return <Dashboard />;

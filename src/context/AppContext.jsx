@@ -34,6 +34,11 @@ export function AppProvider({ children }) {
   const [pptExportError, setPptExportError] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
   const [brochures, setBrochures] = useState(initialBrochures);
+  const [shareLinks, setShareLinks] = useState([
+    { id: 'sl-demo1', brochureId: 'b1', brochureTitle: '2024 产品手册', shareCode: 'prd-2024-catalog', url: 'https://ankki.design/brochures/prd-2024-catalog', password: '', expiresAt: null, views: 128, enabled: true, createdBy: '系统管理员', createdAt: '2024-03-15' },
+    { id: 'sl-demo2', brochureId: 'b3', brochureTitle: '智能制造解决方案', shareCode: 'smart-mfg-solution', url: 'https://ankki.design/brochures/smart-mfg-solution', password: 'ankki2024', expiresAt: '2024-12-31', views: 56, enabled: true, createdBy: '张管理', createdAt: '2024-03-01' },
+    { id: 'sl-demo3', brochureId: 'b4', brochureTitle: '金融科技产品白皮书', shareCode: 'fintech-whitepaper', url: 'https://ankki.design/brochures/fintech-whitepaper', password: '', expiresAt: '2024-06-30', views: 341, enabled: false, createdBy: '系统管理员', createdAt: '2024-01-20' },
+  ]);
   const [auditItems, setAuditItems] = useState(
     initialAssets.slice(0, 8).map(a => ({ ...a, auditStatus: 'pending' }))
   );
@@ -112,6 +117,7 @@ export function AppProvider({ children }) {
       pptExporting, setPptExporting, pptExportError, setPptExportError,
       uploadOpen, setUploadOpen,
       brochures, setBrochures,
+      shareLinks, setShareLinks,
       auditItems, setAuditItems,
       hasPermission, isSuperAdmin, isAdmin, theme, getGenerationStatusMeta,
       callGenerationApi, downloadPptProject,

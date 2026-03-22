@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Users, Shield, BarChart3, MessageSquare, ChevronDown, Moon, Sun, Upload } from 'lucide-react';
+import { Settings, Users, Shield, BarChart3, MessageSquare, ChevronDown, Moon, Sun, Upload, Link2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function TopBar() {
@@ -11,6 +11,7 @@ export default function TopBar() {
   const adminItems = [
     { id: 'admin-users', name: '用户管理', icon: Users },
     { id: 'admin-audit', name: '审核管理', icon: Shield },
+    { id: 'admin-links', name: '链接管理', icon: Link2 },
     { id: 'admin-feedback', name: '反馈管理', icon: MessageSquare },
     { id: 'admin-stats', name: '数据统计', icon: BarChart3 },
     ...(isSuperAdmin ? [{ id: 'admin-settings', name: '系统设置', icon: Settings }] : []),

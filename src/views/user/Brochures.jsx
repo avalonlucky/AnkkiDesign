@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { BookOpen, Eye, Link2, Upload, X, ChevronLeft, ChevronRight, Copy, Check, ExternalLink, Search, Download } from 'lucide-react';
+import { BookOpen, Eye, Link2, Upload, X, ChevronLeft, ChevronRight, Copy, Check, ExternalLink, Search, Download, Lock, Calendar } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { ShareLinkViewer } from '../admin/ShareLinks';
 
 const CATEGORIES = ['全部', '产品手册', '企业画册', '解决方案', '白皮书', '案例集'];
 
@@ -157,21 +158,54 @@ function ReaderModal({ brochure, onClose, onShare }) {
 }
 
 // ─── Share Link Modal ────────────────────────────────────────────────────────
+const EXPIRY_OPTIONS = [
+  { label: '永久有效', value: '' },
+  { label: '7 天', value: 7 },
+  { label: '30 天', value: 30 },
+  { label: '90 天', value: 90 },
+];
+
 function ShareModal({ brochure, onClose }) {
-  const { theme } = useApp();
+  const { theme, currentUser, shareLinks, setShareLinks } = useApp();
+  const [usePassword, setUsePassword] = useState(false);
+  const [password, setPassword] = useState('');
+  const [expiryDays, setExpiryDays] = useState('');
+  const [generated, setGenerated] = useState(() => shareLinks.find(l => l.brochureId === brochure.id) || null);
   const [copied, setCopied] = useState(false);
-  const shareUrl = `https://ankki.design/brochures/${brochure.shareCode}`;
+  const [previewing, setPreviewing] = useState(false);
+
+  const handleGenerate = () => {
+    const code = `${brochure.shareCode || brochure.id}-${Date.now().toString(36)}`;
+    const expiresAt = expiryDays ? new Date(Date.now() + expiryDays * 86400000).toISOString().split('T')[0] : null;
+    const newLink = {
+      id: `sl-${Date.now()}`,
+      brochureId: brochure.id,
+      brochureTitle: brochure.title,
+      shareCode: code,
+      url: `https://ankki.design/brochures/${code}`,
+      password: usePassword ? password : '',
+      expiresAt,
+      views: 0,
+      enabled: true,
+      createdBy: currentUser.name,
+      createdAt: new Date().toLocaleDateString('zh-CN'),
+    };
+    setShareLinks(prev => [newLink, ...prev]);
+    setGenerated(newLink);
+  };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(shareUrl).catch(() => {});
+    if (!generated) return;
+    navigator.clipboard.writeText(generated.url).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
-      <div className="modal-content" style={{ width: 480, backgroundColor: theme.cardBg, borderRadius: 10, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
-        <div style={{ padding: '20px 24px', borderBottom: `1px solid ${theme.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="modal-content" style={{ width: 500, backgroundColor: theme.cardBg, borderRadius: 10, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Link2 size={16} style={{ color: theme.accent }} />
             <span style={{ fontSize: 16, fontWeight: 600, color: theme.text }}>分享彩页</span>
@@ -180,42 +214,101 @@ function ShareModal({ brochure, onClose }) {
         </div>
 
         <div style={{ padding: 24 }}>
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 13, fontWeight: 500, color: theme.text, marginBottom: 6 }}>{brochure.title}</div>
-            <div style={{ fontSize: 12, color: theme.textMuted }}>{brochure.description}</div>
+          {/* Brochure info */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', backgroundColor: theme.bgTertiary, borderRadius: 6, marginBottom: 20 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 6, background: `linear-gradient(135deg, ${brochure.gradient[0]}, ${brochure.gradient[1]})`, flexShrink: 0 }} />
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: theme.text }}>{brochure.title}</div>
+              <div style={{ fontSize: 12, color: theme.textMuted }}>{brochure.category} · {brochure.uploadedBy}</div>
+            </div>
           </div>
 
-          {/* Link box */}
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 12, color: theme.textSecondary, marginBottom: 8, fontWeight: 500 }}>分享链接</div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <div style={{ flex: 1, padding: '10px 14px', backgroundColor: theme.bgTertiary, borderRadius: 6, border: `1px solid ${theme.border}`, fontSize: 13, color: theme.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace' }}>
-                {shareUrl}
+          {!generated ? (
+            /* ── 配置阶段 ── */
+            <>
+              {/* Password */}
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: usePassword ? 10 : 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Lock size={13} style={{ color: theme.textSecondary }} />
+                    <span style={{ fontSize: 13, fontWeight: 500, color: theme.text }}>访问密码</span>
+                    <span style={{ fontSize: 11, color: theme.textMuted }}>（可选）</span>
+                  </div>
+                  <button onClick={() => setUsePassword(!usePassword)} style={{ width: 38, height: 20, borderRadius: 10, backgroundColor: usePassword ? theme.accent : theme.border, border: 'none', cursor: 'pointer', position: 'relative', transition: 'background-color 0.2s' }}>
+                    <span style={{ position: 'absolute', top: 2, left: usePassword ? 20 : 2, width: 16, height: 16, borderRadius: '50%', backgroundColor: '#fff', transition: 'left 0.2s' }} />
+                  </button>
+                </div>
+                {usePassword && (
+                  <input type="text" placeholder="输入访问密码" value={password} onChange={e => setPassword(e.target.value)}
+                    style={{ width: '100%', padding: '10px 14px', border: `1px solid ${theme.border}`, borderRadius: 6, backgroundColor: theme.bg, color: theme.text, fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                )}
               </div>
-              <button onClick={handleCopy} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '10px 16px', backgroundColor: copied ? '#10b981' : theme.accent, color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 500, flexShrink: 0, transition: 'background-color 0.2s' }}>
-                {copied ? <><Check size={13} /> 已复制</> : <><Copy size={13} /> 复制</>}
+
+              {/* Expiry */}
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                  <Calendar size={13} style={{ color: theme.textSecondary }} />
+                  <span style={{ fontSize: 13, fontWeight: 500, color: theme.text }}>有效期</span>
+                  <span style={{ fontSize: 11, color: theme.textMuted }}>（可选，默认永久）</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {EXPIRY_OPTIONS.map(opt => (
+                    <button key={opt.label} onClick={() => setExpiryDays(opt.value)}
+                      style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: `1px solid ${expiryDays === opt.value ? theme.accent : theme.border}`, backgroundColor: expiryDays === opt.value ? theme.accentLight : 'transparent', color: expiryDays === opt.value ? theme.accent : theme.textSecondary, cursor: 'pointer' }}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button onClick={handleGenerate} disabled={usePassword && !password}
+                style={{ width: '100%', padding: '12px', backgroundColor: (usePassword && !password) ? theme.bgTertiary : theme.accent, color: (usePassword && !password) ? theme.textMuted : '#fff', border: 'none', borderRadius: 8, cursor: (usePassword && !password) ? 'not-allowed' : 'pointer', fontSize: 14, fontWeight: 500 }}>
+                生成分享链接
               </button>
-            </div>
-          </div>
+            </>
+          ) : (
+            /* ── 已生成阶段 ── */
+            <>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                <div style={{ flex: 1, padding: '10px 14px', backgroundColor: theme.bgTertiary, borderRadius: 6, border: `1px solid ${theme.border}`, fontSize: 12, color: theme.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'monospace' }}>
+                  {generated.url}
+                </div>
+                <button onClick={handleCopy} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '10px 14px', backgroundColor: copied ? '#10b981' : theme.accent, color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 500, flexShrink: 0, transition: 'background-color 0.2s' }}>
+                  {copied ? <><Check size={12} />已复制</> : <><Copy size={12} />复制</>}
+                </button>
+              </div>
 
-          {/* Tips */}
-          <div style={{ padding: 14, backgroundColor: theme.bgTertiary, borderRadius: 6 }}>
-            <div style={{ fontSize: 12, color: theme.textSecondary, lineHeight: 1.7 }}>
-              <div style={{ fontWeight: 500, color: theme.text, marginBottom: 6 }}>访问说明</div>
-              <div>· 内部员工：登录账号后可直接访问全部彩页</div>
-              <div>· 外部客户：通过此链接可直接查看该彩页内容</div>
-              <div>· 链接永久有效，可随时在管理后台停用</div>
-            </div>
-          </div>
+              {/* Link settings summary */}
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 20, backgroundColor: generated.password ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)', color: generated.password ? '#f59e0b' : '#10b981' }}>
+                  {generated.password ? `🔒 有密码` : '🔓 无密码'}
+                </span>
+                <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 20, backgroundColor: theme.bgTertiary, color: theme.textSecondary }}>
+                  {generated.expiresAt ? `⏱ 至 ${generated.expiresAt}` : '∞ 永久有效'}
+                </span>
+              </div>
 
-          <div style={{ marginTop: 16, display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <button onClick={onClose} style={{ padding: '8px 20px', backgroundColor: 'transparent', color: theme.textSecondary, border: `1px solid ${theme.border}`, borderRadius: 6, cursor: 'pointer', fontSize: 13 }}>关闭</button>
-            <button style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '8px 16px', backgroundColor: theme.bgTertiary, color: theme.textSecondary, border: `1px solid ${theme.border}`, borderRadius: 6, cursor: 'pointer', fontSize: 13 }}>
-              <ExternalLink size={13} /> 在新标签打开
-            </button>
-          </div>
+              <div style={{ padding: 12, backgroundColor: theme.bgTertiary, borderRadius: 6, fontSize: 12, color: theme.textSecondary, lineHeight: 1.8, marginBottom: 16 }}>
+                <div>· 无密码用户直接点链接即可查看</div>
+                <div>· 有密码用户需输入密码后查看</div>
+                <div>· 可在后台「链接管理」停用或删除链接</div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => setPreviewing(true)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '10px', backgroundColor: theme.bgTertiary, color: theme.textSecondary, border: `1px solid ${theme.border}`, borderRadius: 6, cursor: 'pointer', fontSize: 13 }}>
+                  <ExternalLink size={13} /> 预览访问效果
+                </button>
+                <button onClick={() => setGenerated(null)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '10px', backgroundColor: 'transparent', color: theme.accent, border: `1px solid ${theme.accent}`, borderRadius: 6, cursor: 'pointer', fontSize: 13 }}>
+                  重新配置
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
+      {previewing && generated && (
+        <ShareLinkViewer link={generated} brochure={brochure} onClose={() => setPreviewing(false)} />
+      )}
     </div>
   );
 }
