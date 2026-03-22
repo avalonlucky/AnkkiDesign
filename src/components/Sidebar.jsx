@@ -201,7 +201,12 @@ export default function Sidebar() {
               </div>
             </div>
           </div>
-          <LogOut size={15} style={{ color: theme.textMuted, cursor: 'pointer', flexShrink: 0 }} onClick={() => setIsLoggedIn(false)} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button onClick={() => setDarkMode(!darkMode)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.textMuted, display: 'flex', alignItems: 'center', padding: 2 }}>
+              {darkMode ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+            <LogOut size={15} style={{ color: theme.textMuted, cursor: 'pointer', flexShrink: 0 }} onClick={() => setIsLoggedIn(false)} />
+          </div>
         </div>
 
         {/* Role switcher for demo */}
@@ -222,25 +227,13 @@ export default function Sidebar() {
             border: `1px solid ${theme.border}`,
             borderRadius: 6,
             color: theme.textSecondary,
-            fontSize: 12, cursor: 'pointer', outline: 'none', marginBottom: 8,
+            fontSize: 12, cursor: 'pointer', outline: 'none',
           }}
         >
           <option value="superadmin">超级管理员</option>
           <option value="admin">管理员</option>
           <option value="user">普通用户</option>
         </select>
-
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          style={{
-            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            padding: '7px 12px', backgroundColor: theme.bgTertiary,
-            border: `1px solid ${theme.border}`, borderRadius: 6, cursor: 'pointer', color: theme.textSecondary, fontSize: 12,
-          }}
-        >
-          {darkMode ? <Sun size={13} /> : <Moon size={13} />}
-          {darkMode ? '浅色模式' : '深色模式'}
-        </button>
       </div>
     </aside>
   );
