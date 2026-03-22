@@ -1,5 +1,25 @@
 # Ankki Design - 企业视觉素材管理平台
 
+## 💻 每次开机后如何预览
+
+**第一次使用（克隆项目）：**
+```bash
+git clone https://github.com/avalonlucky/AnkkiDesign.git
+cd AnkkiDesign
+npm install
+npm start
+```
+
+**之后每次开机：**
+```bash
+cd AnkkiDesign
+npm start
+```
+
+浏览器访问 http://localhost:3000 即可。
+
+---
+
 ## 📦 本地运行
 
 ```bash
