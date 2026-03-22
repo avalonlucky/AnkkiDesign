@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
-import { FolderOpen, Grid, Moon, Sun, ChevronRight, LogOut, MessageSquare, Play, Presentation, Folder, Image } from 'lucide-react';
+import { FolderOpen, Grid, ChevronRight, LogOut, Play, Presentation, Folder, Image, FileText, MessageSquare, Bookmark, Shield } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { categories } from '../data/mockData';
 
 export default function Sidebar() {
   const {
-    darkMode, setDarkMode, currentView, setCurrentView,
+    currentView, setCurrentView,
     selectedCategory, setSelectedCategory, selectedSubCategory, setSelectedSubCategory,
     expandedCategories, setExpandedCategories,
     isAdmin, isSuperAdmin, currentUser, setCurrentUser, setIsLoggedIn, theme,
@@ -16,34 +16,47 @@ export default function Sidebar() {
     { id: 'assets', name: '素材库', icon: FolderOpen },
     { id: 'ai-video', name: 'AI视频', icon: Play },
     { id: 'ppt-hub', name: 'PPT工具', icon: Presentation },
-    { id: 'feedback', name: '功能反馈', icon: MessageSquare },
   ];
 
-  // Build sidebar categories: exclude ppt (now in nav), merge brand+marketing
+  // Categories: exclude 'all' and 'ppt'; merge template+guide → 品牌文件; merge brand+marketing → 设计素材
   const sidebarCategories = useMemo(() => {
-    const all = categories.find(c => c.id === 'all');
     const brand = categories.find(c => c.id === 'brand');
     const marketing = categories.find(c => c.id === 'marketing');
-    const rest = categories.filter(c => !['all', 'ppt', 'brand', 'marketing'].includes(c.id));
+    const template = categories.find(c => c.id === 'template');
+    const guide = categories.find(c => c.id === 'guide');
+    const internal = categories.find(c => c.id === 'internal');
 
-    const designMerged = {
-      id: 'design',
-      name: '设计素材',
-      icon: Image,
-      count: (brand?.count || 0) + (marketing?.count || 0),
-      children: [
-        ...(brand?.children || []),
-        ...(marketing?.children || []),
-      ],
-    };
-
-    return [all, designMerged, ...rest].filter(Boolean);
+    return [
+      {
+        id: 'design',
+        name: '设计素材',
+        icon: Image,
+        count: (brand?.count || 0) + (marketing?.count || 0),
+        children: [
+          ...(brand?.children || []),
+          ...(marketing?.children || []),
+        ],
+      },
+      {
+        id: 'brand-files',
+        name: '品牌文件',
+        icon: FileText,
+        count: (template?.count || 0) + (guide?.count || 0),
+        children: [
+          ...(template?.children || []),
+          ...(guide?.children || []),
+        ],
+      },
+      ...(internal ? [{ ...internal, icon: Shield }] : []),
+    ];
   }, []);
 
   const isNavActive = (id) => {
     if (id === 'ppt-hub') return currentView === 'ppt-hub' || currentView === 'ai-ppt' || currentView === 'ppt-templates';
     return currentView === id;
   };
+
+  const roleColor = isSuperAdmin ? '#ef4444' : isAdmin ? '#8b5cf6' : theme.textMuted;
 
   return (
     <aside style={{
@@ -62,10 +75,9 @@ export default function Sidebar() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
             width: 34, height: 34,
-            background: darkMode ? 'linear-gradient(135deg, #2563eb, #3b82f6)' : 'linear-gradient(135deg, #1260cc, #1478F0)',
+            background: 'linear-gradient(135deg, #1260cc, #1478F0)',
             borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: '#fff', fontWeight: 800, fontSize: 16, flexShrink: 0,
-            boxShadow: `0 2px 8px ${theme.accent}44`,
           }}>A</div>
           <div>
             <div style={{ fontWeight: 700, fontSize: 14, color: theme.text, letterSpacing: '-0.3px', lineHeight: 1.2 }}>Ankki Design</div>
@@ -76,16 +88,13 @@ export default function Sidebar() {
 
       {/* Nav */}
       <nav style={{ flex: 1, padding: '12px 10px', overflowY: 'auto' }}>
-        {/* Main nav */}
-        <div style={{ marginBottom: 20 }}>
+        {/* Main nav items */}
+        <div style={{ marginBottom: 16 }}>
           {navItems.map(item => (
             <button
               key={item.id}
               className="nav-item"
-              onClick={() => {
-                if (item.id === 'ppt-hub') setCurrentView('ppt-hub');
-                else setCurrentView(item.id);
-              }}
+              onClick={() => setCurrentView(item.id === 'ppt-hub' ? 'ppt-hub' : item.id)}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                 padding: '9px 10px', marginBottom: 2, border: 'none', borderRadius: 6, cursor: 'pointer',
@@ -101,12 +110,7 @@ export default function Sidebar() {
           ))}
         </div>
 
-        {/* Divider */}
-        <div style={{ height: 1, backgroundColor: theme.border, opacity: 0.5, marginBottom: 16, marginLeft: 10, marginRight: 10 }} />
-
-        {/* Category section label */}
-        <div style={{ fontSize: 10.5, fontWeight: 600, color: theme.textMuted, padding: '0 10px', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>素材分类</div>
-
+        {/* Categories — no label, no divider above */}
         {sidebarCategories.map(cat => {
           const isExpanded = expandedCategories.includes(cat.id);
           const hasChildren = cat.children && cat.children.length > 0;
@@ -147,7 +151,7 @@ export default function Sidebar() {
               </button>
 
               {hasChildren && isExpanded && (
-                <div style={{ marginLeft: 22, paddingLeft: 10, borderLeft: `1px solid ${theme.border}`, marginBottom: 4, opacity: 0.9 }}>
+                <div style={{ marginLeft: 22, paddingLeft: 10, borderLeft: `1px solid ${theme.border}`, marginBottom: 4 }}>
                   {cat.children.map(sub => (
                     <button
                       key={sub.id}
@@ -182,58 +186,56 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Bottom user area */}
+      {/* Bottom user area — single card only */}
       <div style={{ padding: '12px 10px', borderTop: `1px solid ${theme.border}` }}>
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '10px 12px', borderRadius: 6, backgroundColor: theme.bgTertiary, marginBottom: 8,
+          padding: '10px 12px', borderRadius: 6, backgroundColor: theme.bgTertiary,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
             <div style={{
               width: 32, height: 32, borderRadius: '50%',
               background: isSuperAdmin ? 'linear-gradient(135deg, #ef4444, #f97316)' : isAdmin ? 'linear-gradient(135deg, #8b5cf6, #a78bfa)' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 13, fontWeight: 600,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 13, fontWeight: 600, flexShrink: 0,
             }}>{currentUser.name[0]}</div>
             <div>
-              <div style={{ fontSize: 12.5, fontWeight: 500, color: theme.text }}>{currentUser.name}</div>
-              <div style={{ fontSize: 10, color: isSuperAdmin ? '#ef4444' : isAdmin ? '#8b5cf6' : theme.textMuted, fontWeight: 500 }}>
-                {isSuperAdmin ? '超管' : isAdmin ? '管理员' : '普通用户'}
-              </div>
+              <div style={{ fontSize: 12.5, fontWeight: 500, color: theme.text, marginBottom: 2 }}>{currentUser.name}</div>
+              {/* Role as inline select for demo */}
+              <select
+                value={currentUser.role}
+                onChange={(e) => {
+                  const roles = {
+                    superadmin: { id: 1, name: '系统管理员', email: 'superadmin@ankki.com', role: 'superadmin', avatar: '👤' },
+                    admin: { id: 2, name: '张管理', email: 'zhangadmin@ankki.com', role: 'admin', avatar: '👤' },
+                    user: { id: 3, name: '王用户', email: 'wanguser@ankki.com', role: 'user', avatar: '👤' },
+                  };
+                  setCurrentUser(roles[e.target.value]);
+                  setCurrentView('dashboard');
+                }}
+                style={{
+                  background: 'none', border: 'none', padding: 0, margin: 0,
+                  fontSize: 10, color: roleColor, fontWeight: 600,
+                  cursor: 'pointer', outline: 'none', appearance: 'none',
+                  WebkitAppearance: 'none',
+                }}
+              >
+                <option value="superadmin">超级管理员</option>
+                <option value="admin">管理员</option>
+                <option value="user">普通用户</option>
+              </select>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button onClick={() => setDarkMode(!darkMode)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.textMuted, display: 'flex', alignItems: 'center', padding: 2 }}>
-              {darkMode ? <Sun size={15} /> : <Moon size={15} />}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <button
+              onClick={() => setCurrentView('feedback')}
+              title="功能反馈"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.textMuted, display: 'flex', alignItems: 'center', padding: 2 }}
+            >
+              <MessageSquare size={14} />
             </button>
-            <LogOut size={15} style={{ color: theme.textMuted, cursor: 'pointer', flexShrink: 0 }} onClick={() => setIsLoggedIn(false)} />
+            <LogOut size={14} style={{ color: theme.textMuted, cursor: 'pointer' }} onClick={() => setIsLoggedIn(false)} />
           </div>
         </div>
-
-        {/* Role switcher for demo */}
-        <select
-          value={currentUser.role}
-          onChange={(e) => {
-            const roles = {
-              superadmin: { id: 1, name: '系统管理员', email: 'superadmin@ankki.com', role: 'superadmin', avatar: '👤' },
-              admin: { id: 2, name: '张管理', email: 'zhangadmin@ankki.com', role: 'admin', avatar: '👤' },
-              user: { id: 3, name: '王用户', email: 'wanguser@ankki.com', role: 'user', avatar: '👤' },
-            };
-            setCurrentUser(roles[e.target.value]);
-            setCurrentView('dashboard');
-          }}
-          style={{
-            width: '100%', padding: '7px 10px',
-            backgroundColor: theme.bgTertiary,
-            border: `1px solid ${theme.border}`,
-            borderRadius: 6,
-            color: theme.textSecondary,
-            fontSize: 12, cursor: 'pointer', outline: 'none',
-          }}
-        >
-          <option value="superadmin">超级管理员</option>
-          <option value="admin">管理员</option>
-          <option value="user">普通用户</option>
-        </select>
       </div>
     </aside>
   );
