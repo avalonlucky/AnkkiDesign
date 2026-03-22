@@ -72,7 +72,7 @@ export default function UploadModal() {
     return icons[extension] || '📄';
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (selectedFiles.length > 0 && assetName && mainCategory && subCategory) {
       setUploading(true);
       setTimeout(() => {
