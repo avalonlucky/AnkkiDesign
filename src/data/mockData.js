@@ -570,3 +570,73 @@ export const initialPptProjects = [
     ],
   },
 ];
+
+// 产品彩页数据
+export const initialBrochures = [
+  {
+    id: 'b1', title: '2024 产品手册', subtitle: 'Product Catalog 2024', category: '产品手册',
+    gradient: ['#1478F0', '#0a4fa8'], pages: 24, uploadedBy: '张管理', uploadedAt: '2024-03-15',
+    size: '8.5 MB', shareCode: 'prd-2024-catalog', views: 1234, description: '覆盖全线产品的年度核心手册，包含规格参数、应用场景与选型指南。',
+    previewPages: [
+      { label: '封面', bg: '#1478F0', title: '2024 产品手册', sub: 'Product Catalog 2024' },
+      { label: '产品概览', bg: '#1260cc', title: '核心产品线', sub: '企业级 · 专业级 · 入门级' },
+      { label: '旗舰产品', bg: '#0a4fa8', title: 'Pro 系列', sub: '性能领先行业 25%' },
+      { label: '参数对比', bg: '#1478F0', title: '规格一览表', sub: '12 款产品全参数' },
+      { label: '案例展示', bg: '#2563eb', title: '标杆客户案例', sub: '覆盖 8 大行业' },
+    ],
+  },
+  {
+    id: 'b2', title: '企业画册 2024', subtitle: 'Company Profile', category: '企业画册',
+    gradient: ['#7c3aed', '#4c1d95'], pages: 32, uploadedBy: '系统管理员', uploadedAt: '2024-02-28',
+    size: '15.2 MB', shareCode: 'corp-profile-2024', views: 892, description: '展示企业发展历程、核心团队、技术实力与战略布局的完整品牌画册。',
+    previewPages: [
+      { label: '封面', bg: '#7c3aed', title: '企业画册 2024', sub: 'Ankki Design Co., Ltd.' },
+      { label: '关于我们', bg: '#6d28d9', title: '创立于 2018', sub: '专注设计科技领域' },
+      { label: '核心业务', bg: '#5b21b6', title: '三大业务方向', sub: '品牌 · 数字 · 体验' },
+      { label: '团队实力', bg: '#4c1d95', title: '150+ 专业团队', sub: '平均行业经验 8 年' },
+    ],
+  },
+  {
+    id: 'b3', title: '智能制造解决方案', subtitle: 'Smart Manufacturing', category: '解决方案',
+    gradient: ['#0f766e', '#134e4a'], pages: 18, uploadedBy: '张管理', uploadedAt: '2024-03-01',
+    size: '6.8 MB', shareCode: 'smart-mfg-solution', views: 567, description: '面向制造业客户的数字化转型整体解决方案，含架构图、实施路径与 ROI 测算。',
+    previewPages: [
+      { label: '封面', bg: '#0f766e', title: '智能制造解决方案', sub: 'Smart Manufacturing Solution' },
+      { label: '行业痛点', bg: '#0d6b63', title: '三大核心挑战', sub: '效率 · 质量 · 成本' },
+      { label: '方案架构', bg: '#0e7560', title: '五层数字化架构', sub: '感知 → 互联 → 分析 → 决策 → 执行' },
+      { label: 'ROI 分析', bg: '#134e4a', title: '18 个月回报周期', sub: '典型客户降本 23%' },
+    ],
+  },
+  {
+    id: 'b4', title: '金融科技产品白皮书', subtitle: 'FinTech White Paper', category: '白皮书',
+    gradient: ['#b45309', '#78350f'], pages: 48, uploadedBy: '系统管理员', uploadedAt: '2024-01-20',
+    size: '22.1 MB', shareCode: 'fintech-whitepaper', views: 2341, description: '深度解析金融科技趋势、监管环境与产品技术路线的行业白皮书。',
+    previewPages: [
+      { label: '封面', bg: '#b45309', title: '金融科技产品白皮书', sub: 'FinTech Industry Report 2024' },
+      { label: '市场规模', bg: '#92400e', title: '2024 市场规模', sub: '全球 3.1 万亿美元' },
+      { label: '技术趋势', bg: '#78350f', title: 'AI · 区块链 · 云原生', sub: '三大核心技术驱动' },
+      { label: '产品矩阵', bg: '#b45309', title: '全栈金融基础设施', sub: '支付 · 风控 · 合规' },
+    ],
+  },
+  {
+    id: 'b5', title: '零售行业案例集', subtitle: 'Retail Case Studies', category: '案例集',
+    gradient: ['#be123c', '#881337'], pages: 36, uploadedBy: '张管理', uploadedAt: '2024-03-10',
+    size: '18.4 MB', shareCode: 'retail-cases-2024', views: 445, description: '精选 12 个零售行业数字化转型落地案例，含项目背景、方案详情与客户收益。',
+    previewPages: [
+      { label: '封面', bg: '#be123c', title: '零售行业案例集', sub: 'Retail Industry Case Studies' },
+      { label: '案例总览', bg: '#9f1239', title: '12 个标杆案例', sub: '覆盖商超 · 品牌 · 电商' },
+      { label: '案例精选', bg: '#881337', title: '某头部商超集团', sub: '数字化会员体系重构' },
+    ],
+  },
+  {
+    id: 'b6', title: '医疗健康产品简介', subtitle: 'Healthcare Products', category: '产品手册',
+    gradient: ['#0369a1', '#0c4a6e'], pages: 20, uploadedBy: '系统管理员', uploadedAt: '2024-02-14',
+    size: '9.7 MB', shareCode: 'healthcare-products', views: 334, description: '面向医疗机构的健康管理产品系列介绍，含设备规格、认证资质与临床数据。',
+    previewPages: [
+      { label: '封面', bg: '#0369a1', title: '医疗健康产品简介', sub: 'Healthcare Product Catalog' },
+      { label: '产品系列', bg: '#075985', title: '四大产品系列', sub: '监测 · 诊断 · 治疗 · 管理' },
+      { label: '核心优势', bg: '#0c4a6e', title: 'CE · FDA · NMPA 认证', sub: '符合全球医疗标准' },
+    ],
+  },
+];
+

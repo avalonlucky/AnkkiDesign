@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Grid, ChevronRight, LogOut, Play, Presentation, Folder, Image, FileText, MessageSquare, Shield } from 'lucide-react';
+import { Grid, ChevronRight, LogOut, Play, Presentation, Folder, Image, FileText, MessageSquare, Shield, BookOpen } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { categories } from '../data/mockData';
 
@@ -13,6 +13,7 @@ export default function Sidebar() {
 
   const navItems = [
     { id: 'dashboard', name: '工作台', icon: Grid },
+    { id: 'brochures', name: '产品彩页', icon: BookOpen },
     { id: 'ai-video', name: 'AI视频', icon: Play },
     { id: 'ppt-hub', name: 'PPT工具', icon: Presentation },
   ];

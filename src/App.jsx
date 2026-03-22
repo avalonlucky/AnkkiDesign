@@ -7,6 +7,7 @@ import Dashboard from './views/user/Dashboard';
 import Assets from './views/user/Assets';
 import PPTHub from './views/user/PPTHub';
 import AIVideo from './views/user/AIVideo';
+import Brochures from './views/user/Brochures';
 import FeedbackView from './views/FeedbackView';
 import AdminUsers from './views/admin/Users';
 import AdminAudit from './views/admin/Audit';
@@ -18,6 +19,7 @@ function renderView(currentView) {
     case 'dashboard': return <Dashboard />;
     case 'assets':
     case 'upload': return <Assets />;
+    case 'brochures': return <Brochures />;
     case 'ai-video': return <AIVideo />;
     case 'ppt-hub':
     case 'ai-ppt':
