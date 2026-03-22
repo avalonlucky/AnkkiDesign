@@ -3,10 +3,10 @@ import { Check, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export default function AdminAudit() {
-  const { theme, darkMode, auditItems, setAuditItems } = useApp();
+  const { theme, darkMode, auditItems, updateAuditStatus } = useApp();
 
-  const approve = (id) => setAuditItems(prev => prev.map(a => a.id === id ? { ...a, auditStatus: 'approved' } : a));
-  const reject  = (id) => setAuditItems(prev => prev.map(a => a.id === id ? { ...a, auditStatus: 'rejected' } : a));
+  const approve = (id) => updateAuditStatus(id, 'approved');
+  const reject  = (id) => updateAuditStatus(id, 'rejected');
 
   const pending  = auditItems.filter(a => a.auditStatus === 'pending');
   const approved = auditItems.filter(a => a.auditStatus === 'approved');
@@ -114,7 +114,7 @@ export default function AdminAudit() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 {statusBadge(asset.auditStatus)}
                 <button
-                  onClick={() => setAuditItems(prev => prev.map(a => a.id === asset.id ? { ...a, auditStatus: 'pending' } : a))}
+                  onClick={() => updateAuditStatus(asset.id, 'pending')}
                   style={{ fontSize: 12, color: theme.textMuted, backgroundColor: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 8px' }}
                 >撤销</button>
               </div>

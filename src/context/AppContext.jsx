@@ -1,5 +1,12 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { initialVideoProjects, initialPptProjects, assets as initialAssets, initialBrochures } from '../data/mockData';
+import {
+  dbFetchBrochures, dbInsertBrochure, dbUpdateBrochure, dbDeleteBrochure,
+  dbFetchShareLinks, dbInsertShareLink, dbUpdateShareLink, dbDeleteShareLink,
+  dbFetchAuditItems, dbInsertAuditItem, dbUpdateAuditItem,
+  mapBrochure, mapShareLink, mapAuditItem,
+  uploadBrochurePDF,
+} from '../lib/db';
 
 const AppContext = createContext(null);
 
@@ -33,15 +40,141 @@ export function AppProvider({ children }) {
   const [pptExporting, setPptExporting] = useState(false);
   const [pptExportError, setPptExportError] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
+
+  // ── Supabase-backed state ─────────────────────────────────────────────────
   const [brochures, setBrochures] = useState(initialBrochures);
-  const [shareLinks, setShareLinks] = useState([
-    { id: 'sl-demo1', brochureId: 'b1', brochureTitle: '2024 产品手册', shareCode: 'prd-2024-catalog', url: 'https://ankki.design/brochures/prd-2024-catalog', password: '', expiresAt: null, views: 128, enabled: true, createdBy: '系统管理员', createdAt: '2024-03-15' },
-    { id: 'sl-demo2', brochureId: 'b3', brochureTitle: '智能制造解决方案', shareCode: 'smart-mfg-solution', url: 'https://ankki.design/brochures/smart-mfg-solution', password: 'ankki2024', expiresAt: '2024-12-31', views: 56, enabled: true, createdBy: '张管理', createdAt: '2024-03-01' },
-    { id: 'sl-demo3', brochureId: 'b4', brochureTitle: '金融科技产品白皮书', shareCode: 'fintech-whitepaper', url: 'https://ankki.design/brochures/fintech-whitepaper', password: '', expiresAt: '2024-06-30', views: 341, enabled: false, createdBy: '系统管理员', createdAt: '2024-01-20' },
-  ]);
+  const [shareLinks, setShareLinks] = useState([]);
   const [auditItems, setAuditItems] = useState(
     initialAssets.slice(0, 8).map(a => ({ ...a, auditStatus: 'pending' }))
   );
+  const [dbReady, setDbReady] = useState(false);
+
+  // Load all Supabase data on mount
+  useEffect(() => {
+    (async () => {
+      const [bRes, slRes, aiRes] = await Promise.all([
+        dbFetchBrochures(),
+        dbFetchShareLinks(),
+        dbFetchAuditItems(),
+      ]);
+      if (bRes.data && bRes.data.length > 0) {
+        setBrochures(bRes.data.map(mapBrochure));
+      }
+      if (slRes.data) {
+        setShareLinks(slRes.data.map(mapShareLink));
+      }
+      if (aiRes.data && aiRes.data.length > 0) {
+        setAuditItems(aiRes.data.map(mapAuditItem));
+      }
+      setDbReady(true);
+    })();
+  }, []);
+
+  // ── Brochure actions ──────────────────────────────────────────────────────
+  const addBrochure = useCallback(async ({ file, meta }) => {
+    const id = `b-${Date.now()}`;
+    let fileUrl = null;
+    let fileName = null;
+    if (file) {
+      try {
+        fileUrl = await uploadBrochurePDF(file, id);
+        fileName = file.name;
+      } catch {
+        // Storage not configured → fall back to blob URL (session only)
+        fileUrl = URL.createObjectURL(file);
+        fileName = file.name;
+      }
+    }
+    const row = {
+      id,
+      title: meta.title,
+      subtitle: meta.title,
+      category: meta.category,
+      gradient: meta.gradient,
+      pages: 0,
+      uploaded_by: meta.uploadedBy,
+      size: meta.size,
+      share_code: id,
+      views: 0,
+      description: meta.description || '',
+      file_url: fileUrl,
+      file_name: fileName,
+    };
+    const { data, error } = await dbInsertBrochure(row);
+    const newItem = data && !error ? mapBrochure(data) : mapBrochure(row);
+    setBrochures(prev => [newItem, ...prev]);
+    return newItem;
+  }, []);
+
+  const removeBrochure = useCallback(async (id) => {
+    await dbDeleteBrochure(id);
+    setBrochures(prev => prev.filter(b => b.id !== id));
+  }, []);
+
+  // ── Share link actions ────────────────────────────────────────────────────
+  const addShareLink = useCallback(async (linkData) => {
+    const row = {
+      id: linkData.id,
+      brochure_id: linkData.brochureId,
+      brochure_title: linkData.brochureTitle,
+      share_code: linkData.shareCode,
+      url: linkData.url,
+      password: linkData.password || '',
+      expires_at: linkData.expiresAt || null,
+      views: 0,
+      enabled: true,
+      created_by: linkData.createdBy,
+    };
+    const { data, error } = await dbInsertShareLink(row);
+    const newLink = data && !error ? mapShareLink(data) : linkData;
+    setShareLinks(prev => [newLink, ...prev]);
+    return newLink;
+  }, []);
+
+  const toggleShareLink = useCallback(async (id, enabled) => {
+    await dbUpdateShareLink(id, { enabled });
+    setShareLinks(prev => prev.map(l => l.id === id ? { ...l, enabled } : l));
+  }, []);
+
+  const removeShareLink = useCallback(async (id) => {
+    await dbDeleteShareLink(id);
+    setShareLinks(prev => prev.filter(l => l.id !== id));
+  }, []);
+
+  const incrementShareLinkViews = useCallback(async (id) => {
+    setShareLinks(prev => prev.map(l => {
+      if (l.id !== id) return l;
+      const views = (l.views || 0) + 1;
+      dbUpdateShareLink(id, { views });
+      return { ...l, views };
+    }));
+  }, []);
+
+  // ── Audit item actions ────────────────────────────────────────────────────
+  const addAuditItem = useCallback(async (item) => {
+    const row = {
+      id: item.id,
+      name: item.name,
+      format: item.format,
+      size: item.size,
+      version: item.version,
+      category: item.category,
+      sub_category: item.subCategory,
+      updated_by: item.updatedBy,
+      submitted_at: item.updatedAt,
+      audit_status: 'pending',
+    };
+    const { data, error } = await dbInsertAuditItem(row);
+    const newItem = data && !error ? mapAuditItem(data) : item;
+    setAuditItems(prev => [newItem, ...prev]);
+  }, []);
+
+  const updateAuditStatus = useCallback(async (id, status) => {
+    await dbUpdateAuditItem(id, { audit_status: status });
+    setAuditItems(prev => prev.map(a => a.id === id ? { ...a, auditStatus: status } : a));
+  }, []);
+
+  // ─────────────────────────────────────────────────────────────────────────
 
   const hasPermission = useCallback((permission) => {
     const permissions = {
@@ -116,9 +249,11 @@ export function AppProvider({ children }) {
       pptGenerating, setPptGenerating, pptError, setPptError,
       pptExporting, setPptExporting, pptExportError, setPptExportError,
       uploadOpen, setUploadOpen,
-      brochures, setBrochures,
-      shareLinks, setShareLinks,
-      auditItems, setAuditItems,
+      // Supabase-backed
+      brochures, addBrochure, removeBrochure,
+      shareLinks, addShareLink, toggleShareLink, removeShareLink, incrementShareLinkViews,
+      auditItems, addAuditItem, updateAuditStatus,
+      dbReady,
       hasPermission, isSuperAdmin, isAdmin, theme, getGenerationStatusMeta,
       callGenerationApi, downloadPptProject,
     }}>

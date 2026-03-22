@@ -166,7 +166,7 @@ const EXPIRY_OPTIONS = [
 ];
 
 function ShareModal({ brochure, onClose }) {
-  const { theme, currentUser, shareLinks, setShareLinks } = useApp();
+  const { theme, currentUser, shareLinks, addShareLink } = useApp();
   const [usePassword, setUsePassword] = useState(false);
   const [password, setPassword] = useState('');
   const [expiryDays, setExpiryDays] = useState('');
@@ -174,10 +174,10 @@ function ShareModal({ brochure, onClose }) {
   const [copied, setCopied] = useState(false);
   const [previewing, setPreviewing] = useState(false);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     const code = `${brochure.shareCode || brochure.id}-${Date.now().toString(36)}`;
     const expiresAt = expiryDays ? new Date(Date.now() + expiryDays * 86400000).toISOString().split('T')[0] : null;
-    const newLink = {
+    const linkData = {
       id: `sl-${Date.now()}`,
       brochureId: brochure.id,
       brochureTitle: brochure.title,
@@ -190,8 +190,8 @@ function ShareModal({ brochure, onClose }) {
       createdBy: currentUser.name,
       createdAt: new Date().toLocaleDateString('zh-CN'),
     };
-    setShareLinks(prev => [newLink, ...prev]);
-    setGenerated(newLink);
+    const saved = await addShareLink(linkData);
+    setGenerated(saved || linkData);
   };
 
   const handleCopy = () => {

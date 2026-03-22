@@ -3,7 +3,7 @@ import { Upload, X, Check } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function UploadModal() {
-  const { theme, darkMode, currentUser, isSuperAdmin, isAdmin, setUploadOpen, setAuditItems, setBrochures } = useApp();
+  const { theme, darkMode, currentUser, isSuperAdmin, isAdmin, setUploadOpen, addAuditItem, addBrochure } = useApp();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [assetName, setAssetName] = useState('');
   const [mainCategory, setMainCategory] = useState('');
@@ -79,33 +79,24 @@ export default function UploadModal() {
         setUploading(false);
         setUploadSuccess(true);
         if (isAdmin && mainCategory === 'brochure') {
-          // 管理员上传彩页 → 直接加入彩页书架
+          // 管理员上传彩页 → 写入 Supabase brochures 表 + Storage
           const subLabels = { 'company-intro': '公司介绍', 'product-single': '产品单页', 'solution': '解决方案', 'case-study': '案例集' };
           const gradients = [['#1478F0','#0a4fa8'],['#7c3aed','#4c1d95'],['#0f766e','#134e4a'],['#be123c','#881337'],['#b45309','#78350f'],['#0369a1','#0c4a6e']];
           const g = gradients[Math.floor(Math.random() * gradients.length)];
-          const file = selectedFiles[0]?.file;
-          const fileUrl = file ? URL.createObjectURL(file) : null;
-          const newBrochure = {
-            id: `b-${Date.now()}`,
-            title: assetName,
-            subtitle: assetName,
-            category: subLabels[subCategory] || subCategory,
-            gradient: g,
-            pages: 0,
-            uploadedBy: currentUser.name,
-            uploadedAt: new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }),
-            size: selectedFiles[0]?.size || '-',
-            shareCode: `brochure-${Date.now()}`,
-            views: 0,
-            description: description || assetName,
-            fileUrl,
-            fileName: selectedFiles[0]?.name || assetName,
-            previewPages: [{ label: '封面', bg: g[0], title: assetName, sub: subLabels[subCategory] || '' }],
-          };
-          setBrochures(prev => [newBrochure, ...prev]);
+          await addBrochure({
+            file: selectedFiles[0]?.file || null,
+            meta: {
+              title: assetName,
+              category: subLabels[subCategory] || subCategory,
+              gradient: g,
+              uploadedBy: currentUser.name,
+              size: selectedFiles[0]?.size || '-',
+              description: description || assetName,
+            },
+          });
         } else if (!isAdmin) {
-          // 普通用户上传 → 加入审核队列
-          const newItem = {
+          // 普通用户上传 → 写入 Supabase audit_items 表
+          await addAuditItem({
             id: `upload-${Date.now()}`,
             name: assetName,
             format: selectedFiles[0]?.extension || '未知',
@@ -116,8 +107,7 @@ export default function UploadModal() {
             updatedBy: currentUser.name,
             updatedAt: new Date().toLocaleDateString('zh-CN'),
             auditStatus: 'pending',
-          };
-          setAuditItems(prev => [newItem, ...prev]);
+          });
         }
         setTimeout(() => {
           setUploadSuccess(false);

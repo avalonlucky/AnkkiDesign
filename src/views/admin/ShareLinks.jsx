@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext';
 
 // ─── Link Access Previewer ───────────────────────────────────────────────────
 export function ShareLinkViewer({ link, brochure, onClose }) {
-  const { theme, setShareLinks } = useApp();
+  const { theme, incrementShareLinkViews } = useApp();
   const [pwInput, setPwInput] = useState('');
   const [pwError, setPwError] = useState(false);
   const [unlocked, setUnlocked] = useState(!link.password);
@@ -16,8 +16,7 @@ export function ShareLinkViewer({ link, brochure, onClose }) {
     if (pwInput === link.password) {
       setUnlocked(true);
       setPwError(false);
-      // increment view count
-      setShareLinks(prev => prev.map(l => l.id === link.id ? { ...l, views: l.views + 1 } : l));
+      incrementShareLinkViews(link.id);
     } else {
       setPwError(true);
     }
@@ -25,7 +24,7 @@ export function ShareLinkViewer({ link, brochure, onClose }) {
 
   React.useEffect(() => {
     if (unlocked && !link.password) {
-      setShareLinks(prev => prev.map(l => l.id === link.id ? { ...l, views: l.views + 1 } : l));
+      incrementShareLinkViews(link.id);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -91,14 +90,14 @@ export function ShareLinkViewer({ link, brochure, onClose }) {
 
 // ─── Admin Share Links View ──────────────────────────────────────────────────
 export default function AdminShareLinks() {
-  const { theme, shareLinks, setShareLinks, brochures, currentUser } = useApp();
+  const { theme, shareLinks, toggleShareLink, removeShareLink, brochures } = useApp();
   const [previewLink, setPreviewLink] = useState(null);
 
   const totalViews = shareLinks.reduce((s, l) => s + l.views, 0);
   const activeCount = shareLinks.filter(l => l.enabled).length;
 
-  const toggleEnabled = (id) => setShareLinks(prev => prev.map(l => l.id === id ? { ...l, enabled: !l.enabled } : l));
-  const deleteLink = (id) => setShareLinks(prev => prev.filter(l => l.id !== id));
+  const toggleEnabled = (id, current) => toggleShareLink(id, !current);
+  const deleteLink = (id) => removeShareLink(id);
 
   const copyUrl = (url) => navigator.clipboard.writeText(url).catch(() => {});
 
@@ -185,7 +184,7 @@ export default function AdminShareLinks() {
                     <td style={{ padding: '14px 16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <button onClick={() => setPreviewLink(link)} title="预览访问效果" style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.textMuted, display: 'flex', padding: 3 }}><ExternalLink size={14} /></button>
-                        <button onClick={() => toggleEnabled(link.id)} title={link.enabled ? '停用' : '启用'} style={{ background: 'none', border: 'none', cursor: 'pointer', color: link.enabled ? theme.success : theme.textMuted, display: 'flex', padding: 3 }}>
+                        <button onClick={() => toggleEnabled(link.id, link.enabled)} title={link.enabled ? '停用' : '启用'} style={{ background: 'none', border: 'none', cursor: 'pointer', color: link.enabled ? theme.success : theme.textMuted, display: 'flex', padding: 3 }}>
                           {link.enabled ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
                         </button>
                         <button onClick={() => deleteLink(link.id)} title="删除" style={{ background: 'none', border: 'none', cursor: 'pointer', color: theme.textMuted, display: 'flex', padding: 3 }}><Trash2 size={14} /></button>
