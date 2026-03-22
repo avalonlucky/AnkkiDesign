@@ -17,6 +17,9 @@ export default function UploadModal() {
   const onClose = () => setUploadOpen(false);
 
   const categoryTree = {
+    'brochure': { name: '产品彩页', icon: '📖', subs: [
+      { id: 'company-intro', name: '公司介绍' }, { id: 'product-single', name: '产品单页' }, { id: 'solution', name: '解决方案' }, { id: 'case-study', name: '案例集' },
+    ]},
     'brand': { name: '品牌素材', icon: '🎨', subs: [
       { id: 'logo', name: 'Logo标志' }, { id: 'color', name: '色卡规范' }, { id: 'font', name: '字体文件' }, { id: 'vi', name: 'VI规范' },
     ]},
