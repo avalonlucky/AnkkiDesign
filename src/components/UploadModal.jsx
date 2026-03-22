@@ -3,7 +3,7 @@ import { Upload, X, Check } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function UploadModal() {
-  const { theme, darkMode, currentUser, isSuperAdmin, setUploadOpen } = useApp();
+  const { theme, darkMode, currentUser, isSuperAdmin, isAdmin, setUploadOpen } = useApp();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [assetName, setAssetName] = useState('');
   const [mainCategory, setMainCategory] = useState('');
@@ -92,7 +92,7 @@ export default function UploadModal() {
         <div style={{ padding: '20px 28px', borderBottom: `1px solid ${theme.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <div>
             <h2 style={{ fontSize: 20, fontWeight: 600, color: theme.text, marginBottom: 4 }}>上传素材</h2>
-            <p style={{ fontSize: 13, color: theme.textSecondary }}>上传新的品牌素材供团队使用</p>
+            <p style={{ fontSize: 13, color: theme.textSecondary }}>{isAdmin ? '管理员上传后直接发布，无需审核' : '上传后需经管理员审核方可发布'}</p>
           </div>
           <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: theme.bgTertiary, border: 'none', cursor: 'pointer', color: theme.textSecondary, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
         </div>
@@ -170,14 +170,14 @@ export default function UploadModal() {
               <div style={{ padding: 16, backgroundColor: 'rgba(16, 185, 129, 0.1)', borderRadius: 5, display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
                 <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Check size={22} color="#fff" /></div>
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 500, color: '#10b981' }}>上传成功！</div>
-                  <div style={{ fontSize: 13, color: theme.textSecondary }}>素材已提交审核，审核通过后将显示在素材库中</div>
+                  <div style={{ fontSize: 15, fontWeight: 500, color: '#10b981' }}>{isAdmin ? '发布成功！' : '上传成功！'}</div>
+                  <div style={{ fontSize: 13, color: theme.textSecondary }}>{isAdmin ? '素材已直接发布，现已在素材库中可见。' : '素材已提交审核，审核通过后将显示在素材库中。'}</div>
                 </div>
               </div>
             )}
             <div style={{ display: 'flex', gap: 12 }}>
               <button onClick={handleSubmit} disabled={uploading || selectedFiles.length === 0 || !assetName || !mainCategory || !subCategory} style={{ flex: 1, padding: '14px', backgroundColor: (selectedFiles.length > 0 && assetName && mainCategory && subCategory) ? theme.accent : theme.bgTertiary, color: (selectedFiles.length > 0 && assetName && mainCategory && subCategory) ? '#fff' : theme.textMuted, border: 'none', borderRadius: 8, cursor: (selectedFiles.length > 0 && assetName && mainCategory && subCategory) ? 'pointer' : 'not-allowed', fontSize: 14, fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                {uploading ? (<><span style={{ width: 18, height: 18, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />上传中...</>) : '提交审核'}
+                {uploading ? (<><span style={{ width: 18, height: 18, border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />上传中...</>) : isAdmin ? '直接发布' : '提交审核'}
               </button>
               <button onClick={onClose} style={{ padding: '14px 28px', backgroundColor: 'transparent', color: theme.textSecondary, border: `1px solid ${theme.border}`, borderRadius: 8, cursor: 'pointer', fontSize: 14 }}>取消</button>
             </div>
