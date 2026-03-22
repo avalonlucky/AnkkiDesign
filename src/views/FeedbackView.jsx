@@ -55,10 +55,11 @@ function UserFeedbackView({ theme }) {
         <div style={{
           backgroundColor: theme.cardBg,
           borderRadius: 6,
-          border: `1px solid ${theme.border}`,
+          border: 'none',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
           overflow: 'hidden',
         }}>
-          <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}` }}>
+          <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}60` }}>
             <h3 style={{ fontSize: 16, fontWeight: 600, color: theme.text }}>提交反馈</h3>
           </div>
           <div style={{ padding: 24 }}>
@@ -156,10 +157,11 @@ function UserFeedbackView({ theme }) {
         <div style={{
           backgroundColor: theme.cardBg,
           borderRadius: 6,
-          border: `1px solid ${theme.border}`,
+          border: 'none',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
           overflow: 'hidden',
         }}>
-          <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}` }}>
+          <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}60` }}>
             <h3 style={{ fontSize: 16, fontWeight: 600, color: theme.text }}>我的反馈</h3>
           </div>
           <div style={{ maxHeight: 500, overflowY: 'auto' }}>
@@ -360,7 +362,7 @@ function AdminFeedbackView({ theme, darkMode }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
         {stats.map((stat, i) => (
           <div key={i} style={{
-            padding: 20, backgroundColor: theme.cardBg, borderRadius: 6, border: `1px solid ${theme.border}`,
+            padding: 20, backgroundColor: theme.cardBg, borderRadius: 6, border: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
           }}>
             <div style={{ fontSize: 28, fontWeight: 600, color: stat.color, marginBottom: 4, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>{stat.value}</div>
             <div style={{ fontSize: 13, color: theme.textSecondary }}>{stat.label}</div>
@@ -392,7 +394,7 @@ function AdminFeedbackView({ theme, darkMode }) {
       </div>
 
       <div style={{
-        backgroundColor: theme.cardBg, borderRadius: 6, border: `1px solid ${theme.border}`, overflow: 'hidden',
+        backgroundColor: theme.cardBg, borderRadius: 6, border: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', overflow: 'hidden',
       }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>

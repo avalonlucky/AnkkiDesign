@@ -54,7 +54,8 @@ export default function AdminAudit() {
             backgroundColor: theme.cardBg,
             borderRadius: 6,
             padding: 20,
-            border: `1px solid ${theme.border}`,
+            border: 'none',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
           }}>
             <div style={{ fontSize: 28, fontWeight: 600, color: stat.color, marginBottom: 4, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>{stat.value}</div>
             <div style={{ fontSize: 13, color: theme.textSecondary }}>{stat.label}</div>
@@ -65,9 +66,10 @@ export default function AdminAudit() {
       <div style={{
         backgroundColor: theme.cardBg,
         borderRadius: 6,
-        border: `1px solid ${theme.border}`,
+        border: 'none',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
       }}>
-        <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}` }}>
+        <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}60` }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, color: theme.text }}>待审核列表</h3>
         </div>
         {assets.slice(0, 4).map((asset, i) => (

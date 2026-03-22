@@ -24,7 +24,8 @@ export default function AdminStats() {
             backgroundColor: theme.cardBg,
             borderRadius: 6,
             padding: 24,
-            border: `1px solid ${theme.border}`,
+            border: 'none',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
           }}>
             <div style={{
               width: 44, height: 44, borderRadius: 6,
@@ -43,9 +44,10 @@ export default function AdminStats() {
       <div style={{
         backgroundColor: theme.cardBg,
         borderRadius: 6,
-        border: `1px solid ${theme.border}`,
+        border: 'none',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
       }}>
-        <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}` }}>
+        <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}60` }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, color: theme.text }}>热门素材 TOP 5</h3>
         </div>
         {[...assets].sort((a, b) => b.downloads - a.downloads).slice(0, 5).map((asset, i) => (

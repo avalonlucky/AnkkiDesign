@@ -1,11 +1,11 @@
 import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Sidebar from './components/Sidebar';
+import TopBar from './components/TopBar';
 import Dashboard from './views/user/Dashboard';
 import Assets from './views/user/Assets';
-import PPTTemplates from './views/user/PPTTemplates';
+import PPTHub from './views/user/PPTHub';
 import AIVideo from './views/user/AIVideo';
-import AIPPT from './views/user/AIPPT';
 import FeedbackView from './views/FeedbackView';
 import AdminUsers from './views/admin/Users';
 import AdminAudit from './views/admin/Audit';
@@ -18,8 +18,9 @@ function renderView(currentView) {
     case 'assets':
     case 'upload': return <Assets />;
     case 'ai-video': return <AIVideo />;
-    case 'ai-ppt': return <AIPPT />;
-    case 'ppt-templates': return <PPTTemplates />;
+    case 'ppt-hub':
+    case 'ai-ppt':
+    case 'ppt-templates': return <PPTHub />;
     case 'feedback': return <FeedbackView />;
     case 'admin-users': return <AdminUsers />;
     case 'admin-audit': return <AdminAudit />;
@@ -31,7 +32,7 @@ function renderView(currentView) {
 }
 
 function AppShell() {
-  const { currentView, theme, darkMode } = useApp();
+  const { currentView, theme, darkMode, isAdmin } = useApp();
 
   return (
     <div style={{
@@ -148,8 +149,9 @@ function AppShell() {
       `}</style>
 
       <Sidebar />
+      <TopBar />
 
-      <main style={{ marginLeft: 260, flex: 1, minHeight: '100vh' }}>
+      <main style={{ marginLeft: 240, flex: 1, minHeight: '100vh', paddingTop: isAdmin ? 48 : 0 }}>
         <div key={currentView} className="page-view">
           {renderView(currentView)}
         </div>

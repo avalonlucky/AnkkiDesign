@@ -14,10 +14,11 @@ export default function AdminSettings() {
       <div style={{
         backgroundColor: theme.cardBg,
         borderRadius: 6,
-        border: `1px solid ${theme.border}`,
+        border: 'none',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
         marginBottom: 24,
       }}>
-        <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}` }}>
+        <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}60` }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, color: theme.text }}>基本设置</h3>
         </div>
         <div style={{ padding: 24 }}>
@@ -51,9 +52,10 @@ export default function AdminSettings() {
       <div style={{
         backgroundColor: theme.cardBg,
         borderRadius: 6,
-        border: `1px solid ${theme.border}`,
+        border: 'none',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
       }}>
-        <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}` }}>
+        <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}60` }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, color: theme.text }}>上传设置</h3>
         </div>
         <div style={{ padding: 24 }}>

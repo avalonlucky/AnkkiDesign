@@ -90,7 +90,8 @@ export default function AIVideo() {
         <div style={{
           backgroundColor: theme.cardBg,
           borderRadius: 8,
-          border: `1px solid ${theme.border}`,
+          border: 'none',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
           padding: 24,
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -270,7 +271,8 @@ export default function AIVideo() {
               padding: 20,
               borderRadius: 8,
               backgroundColor: theme.cardBg,
-              border: `1px solid ${theme.border}`,
+              border: 'none',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
             }}>
               <div style={{
                 width: 42,
@@ -296,10 +298,11 @@ export default function AIVideo() {
         <div style={{
           backgroundColor: theme.cardBg,
           borderRadius: 8,
-          border: `1px solid ${theme.border}`,
+          border: 'none',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
           overflow: 'hidden',
         }}>
-          <div style={{ padding: '18px 20px', borderBottom: `1px solid ${theme.border}` }}>
+          <div style={{ padding: '18px 20px', borderBottom: `1px solid ${theme.border}60` }}>
             <h3 style={{ fontSize: 16, fontWeight: 600, color: theme.text, marginBottom: 4 }}>生成记录</h3>
             <p style={{ fontSize: 12, color: theme.textMuted }}>点击查看最近输出的脚本与分镜。</p>
           </div>
@@ -338,7 +341,8 @@ export default function AIVideo() {
         <div style={{
           backgroundColor: theme.cardBg,
           borderRadius: 8,
-          border: `1px solid ${theme.border}`,
+          border: 'none',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
           padding: 24,
         }}>
           {activeVideoProject && (
@@ -395,7 +399,7 @@ export default function AIVideo() {
                   <div key={`${activeVideoProject.id}-${scene.title}`} style={{
                     padding: 18,
                     borderRadius: 6,
-                    border: `1px solid ${theme.border}`,
+                    borderBottom: `1px solid ${theme.border}40`,
                     backgroundColor: theme.bgSecondary,
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 16, marginBottom: 10 }}>

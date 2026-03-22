@@ -223,7 +223,7 @@ export default function AdminUsers() {
           { label: '管理员', value: users.filter(u => u.role === 'admin').length, color: '#8b5cf6' },
           { label: '普通用户', value: users.filter(u => u.role === 'user').length, color: theme.textSecondary },
         ].map((stat, i) => (
-          <div key={i} style={{ padding: 20, backgroundColor: theme.cardBg, borderRadius: 6, border: `1px solid ${theme.border}` }}>
+          <div key={i} style={{ padding: 20, backgroundColor: theme.cardBg, borderRadius: 6, border: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
             <div style={{ fontSize: 28, fontWeight: 600, color: stat.color, marginBottom: 4, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>{stat.value}</div>
             <div style={{ fontSize: 13, color: theme.textSecondary }}>{stat.label}</div>
           </div>
@@ -252,7 +252,7 @@ export default function AdminUsers() {
         ))}
       </div>
 
-      <div style={{ backgroundColor: theme.cardBg, borderRadius: 6, border: `1px solid ${theme.border}`, overflow: 'hidden' }}>
+      <div style={{ backgroundColor: theme.cardBg, borderRadius: 6, border: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ backgroundColor: theme.bgTertiary }}>
