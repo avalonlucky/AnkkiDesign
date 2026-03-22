@@ -83,6 +83,8 @@ export default function UploadModal() {
           const subLabels = { 'company-intro': '公司介绍', 'product-single': '产品单页', 'solution': '解决方案', 'case-study': '案例集' };
           const gradients = [['#1478F0','#0a4fa8'],['#7c3aed','#4c1d95'],['#0f766e','#134e4a'],['#be123c','#881337'],['#b45309','#78350f'],['#0369a1','#0c4a6e']];
           const g = gradients[Math.floor(Math.random() * gradients.length)];
+          const file = selectedFiles[0]?.file;
+          const fileUrl = file ? URL.createObjectURL(file) : null;
           const newBrochure = {
             id: `b-${Date.now()}`,
             title: assetName,
@@ -96,6 +98,8 @@ export default function UploadModal() {
             shareCode: `brochure-${Date.now()}`,
             views: 0,
             description: description || assetName,
+            fileUrl,
+            fileName: selectedFiles[0]?.name || assetName,
             previewPages: [{ label: '封面', bg: g[0], title: assetName, sub: subLabels[subCategory] || '' }],
           };
           setBrochures(prev => [newBrochure, ...prev]);

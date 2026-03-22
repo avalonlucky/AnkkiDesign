@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpen, Eye, Link2, Upload, X, ChevronLeft, ChevronRight, Copy, Check, ExternalLink, Search } from 'lucide-react';
+import { BookOpen, Eye, Link2, Upload, X, ChevronLeft, ChevronRight, Copy, Check, ExternalLink, Search, Download } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 const CATEGORIES = ['全部', '产品手册', '企业画册', '解决方案', '白皮书', '案例集'];
@@ -63,71 +63,94 @@ function BookCard({ brochure, isAdmin, onView, onShare }) {
 function ReaderModal({ brochure, onClose, onShare }) {
   const { theme } = useApp();
   const [page, setPage] = useState(0);
+  const hasRealPdf = !!brochure.fileUrl;
   const pages = brochure.previewPages;
   const cur = pages[page];
   const [g0, g1] = brochure.gradient;
 
+  const handleDownload = () => {
+    if (brochure.fileUrl) {
+      const a = document.createElement('a');
+      a.href = brochure.fileUrl;
+      a.download = brochure.fileName || `${brochure.title}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+  };
+
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 1000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
-      <div className="modal-content" style={{ width: 860, maxHeight: '92vh', backgroundColor: theme.cardBg, borderRadius: 10, overflow: 'hidden', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
+      <div className="modal-content" style={{ width: hasRealPdf ? '92vw' : 860, height: hasRealPdf ? '92vh' : 'auto', maxHeight: '92vh', backgroundColor: theme.cardBg, borderRadius: 10, overflow: 'hidden', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
+
         {/* Header */}
-        <div style={{ padding: '14px 20px', borderBottom: `1px solid ${theme.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <div style={{ padding: '12px 20px', borderBottom: `1px solid ${theme.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <BookOpen size={18} style={{ color: theme.accent }} />
+            <BookOpen size={16} style={{ color: theme.accent }} />
             <div>
-              <div style={{ fontSize: 15, fontWeight: 600, color: theme.text }}>{brochure.title}</div>
-              <div style={{ fontSize: 12, color: theme.textMuted }}>{brochure.pages} 页 · {brochure.size} · {brochure.uploadedBy}</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: theme.text }}>{brochure.title}</div>
+              <div style={{ fontSize: 12, color: theme.textMuted }}>{brochure.size} · {brochure.uploadedBy}</div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {hasRealPdf && (
+              <button onClick={handleDownload} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', backgroundColor: theme.bgTertiary, color: theme.textSecondary, border: `1px solid ${theme.border}`, borderRadius: 6, cursor: 'pointer', fontSize: 13 }}>
+                <Download size={13} /> 下载
+              </button>
+            )}
             <button onClick={() => onShare(brochure)} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', backgroundColor: theme.accentLight, color: theme.accent, border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13 }}>
-              <Link2 size={13} /> 分享链接
+              <Link2 size={13} /> 分享
             </button>
             <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: theme.bgTertiary, border: 'none', cursor: 'pointer', color: theme.textSecondary, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={16} /></button>
           </div>
         </div>
 
-        {/* Page viewer */}
-        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-          {/* Thumbnail sidebar */}
-          <div style={{ width: 120, borderRight: `1px solid ${theme.border}`, overflowY: 'auto', padding: '12px 8px', flexShrink: 0, backgroundColor: theme.bgTertiary }}>
-            {pages.map((p, i) => (
-              <div key={i} onClick={() => setPage(i)} style={{ marginBottom: 8, cursor: 'pointer', borderRadius: 5, overflow: 'hidden', border: page === i ? `2px solid ${theme.accent}` : '2px solid transparent', transition: 'border-color 0.15s' }}>
-                <div style={{ height: 76, background: `linear-gradient(160deg, ${g0}, ${g1})`, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 6 }}>
-                  <div style={{ textAlign: 'center', color: '#fff' }}>
-                    <div style={{ fontSize: 9, opacity: 0.8, marginBottom: 2 }}>P{i + 1}</div>
-                    <div style={{ fontSize: 8, fontWeight: 600, lineHeight: 1.3 }}>{p.label}</div>
+        {/* Body */}
+        {hasRealPdf ? (
+          /* ── 真实 PDF：全屏 iframe ── */
+          <iframe
+            src={brochure.fileUrl}
+            title={brochure.title}
+            style={{ flex: 1, border: 'none', width: '100%', backgroundColor: '#525659' }}
+          />
+        ) : (
+          /* ── Mock 数据：幻灯片预览 ── */
+          <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            {/* Thumbnail sidebar */}
+            <div style={{ width: 110, borderRight: `1px solid ${theme.border}`, overflowY: 'auto', padding: '10px 8px', flexShrink: 0, backgroundColor: theme.bgTertiary }}>
+              {pages.map((p, i) => (
+                <div key={i} onClick={() => setPage(i)} style={{ marginBottom: 8, cursor: 'pointer', borderRadius: 5, overflow: 'hidden', border: page === i ? `2px solid ${theme.accent}` : '2px solid transparent', transition: 'border-color 0.15s' }}>
+                  <div style={{ height: 68, background: `linear-gradient(160deg, ${g0}, ${g1})`, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 6 }}>
+                    <div style={{ textAlign: 'center', color: '#fff' }}>
+                      <div style={{ fontSize: 9, opacity: 0.8, marginBottom: 2 }}>P{i + 1}</div>
+                      <div style={{ fontSize: 8, fontWeight: 600, lineHeight: 1.3 }}>{p.label}</div>
+                    </div>
                   </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Main page */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: theme.bg }}>
+              <div style={{ width: '100%', maxWidth: 520, aspectRatio: '16/10', background: `linear-gradient(160deg, ${g0}, ${g1})`, borderRadius: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, boxShadow: '0 12px 40px rgba(0,0,0,0.2)', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: 16, left: 20, fontSize: 10, color: 'rgba(255,255,255,0.6)', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>{cur.label}</div>
+                <div style={{ position: 'absolute', bottom: 14, right: 18, fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>{page + 1} / {pages.length}</div>
+                <div style={{ width: 40, height: 3, backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 2, marginBottom: 20 }} />
+                <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', textAlign: 'center', lineHeight: 1.3, marginBottom: 14, textShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>{cur.title}</div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', textAlign: 'center', lineHeight: 1.6 }}>{cur.sub}</div>
               </div>
-            ))}
-          </div>
-
-          {/* Main page */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: theme.bg }}>
-            <div style={{ width: '100%', maxWidth: 560, aspectRatio: '16/10', background: `linear-gradient(160deg, ${g0}, ${g1})`, borderRadius: 8, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, boxShadow: '0 12px 40px rgba(0,0,0,0.2)', position: 'relative', overflow: 'hidden' }}>
-              {/* Page label */}
-              <div style={{ position: 'absolute', top: 16, left: 20, fontSize: 10, color: 'rgba(255,255,255,0.6)', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>{cur.label}</div>
-              {/* Page number */}
-              <div style={{ position: 'absolute', bottom: 14, right: 18, fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>{page + 1} / {pages.length}</div>
-              {/* Decorative line */}
-              <div style={{ width: 40, height: 3, backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 2, marginBottom: 20 }} />
-              <div style={{ fontSize: 26, fontWeight: 800, color: '#fff', textAlign: 'center', lineHeight: 1.3, marginBottom: 14, textShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>{cur.title}</div>
-              <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.8)', textAlign: 'center', lineHeight: 1.6 }}>{cur.sub}</div>
-            </div>
-
-            {/* Nav */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 20 }}>
-              <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: theme.bgSecondary, border: `1px solid ${theme.border}`, cursor: page === 0 ? 'not-allowed' : 'pointer', color: page === 0 ? theme.textMuted : theme.text, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: page === 0 ? 0.4 : 1 }}>
-                <ChevronLeft size={18} />
-              </button>
-              <span style={{ fontSize: 13, color: theme.textMuted }}>{page + 1} / {pages.length}</span>
-              <button onClick={() => setPage(p => Math.min(pages.length - 1, p + 1))} disabled={page === pages.length - 1} style={{ width: 36, height: 36, borderRadius: '50%', backgroundColor: theme.bgSecondary, border: `1px solid ${theme.border}`, cursor: page === pages.length - 1 ? 'not-allowed' : 'pointer', color: page === pages.length - 1 ? theme.textMuted : theme.text, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: page === pages.length - 1 ? 0.4 : 1 }}>
-                <ChevronRight size={18} />
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 20 }}>
+                <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} style={{ width: 34, height: 34, borderRadius: '50%', backgroundColor: theme.bgSecondary, border: `1px solid ${theme.border}`, cursor: page === 0 ? 'not-allowed' : 'pointer', color: page === 0 ? theme.textMuted : theme.text, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: page === 0 ? 0.4 : 1 }}>
+                  <ChevronLeft size={16} />
+                </button>
+                <span style={{ fontSize: 13, color: theme.textMuted }}>{page + 1} / {pages.length}</span>
+                <button onClick={() => setPage(p => Math.min(pages.length - 1, p + 1))} disabled={page === pages.length - 1} style={{ width: 34, height: 34, borderRadius: '50%', backgroundColor: theme.bgSecondary, border: `1px solid ${theme.border}`, cursor: page === pages.length - 1 ? 'not-allowed' : 'pointer', color: page === pages.length - 1 ? theme.textMuted : theme.text, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: page === pages.length - 1 ? 0.4 : 1 }}>
+                  <ChevronRight size={16} />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
