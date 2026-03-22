@@ -75,7 +75,7 @@ export default function UploadModal() {
   const handleSubmit = async () => {
     if (selectedFiles.length > 0 && assetName && mainCategory && subCategory) {
       setUploading(true);
-      setTimeout(() => {
+      setTimeout(async () => {
         setUploading(false);
         setUploadSuccess(true);
         if (isAdmin && mainCategory === 'brochure') {
