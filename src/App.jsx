@@ -1,5 +1,687 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Search, Upload, Download, Eye, Settings, Users, FolderOpen, Grid, List, Moon, Sun, ChevronRight, ChevronDown, Clock, Tag, FileText, Image, FileSpreadsheet, Presentation, MoreVertical, Plus, Filter, Bell, LogOut, BarChart3, Shield, History, Bookmark, Star, Check, X, Edit, Trash2, Copy, Play, Layers, Layout, PieChart, Type, ImageIcon, GitBranch, Table, Map, Award, User, Camera, MessageSquare, Send, ThumbsUp, AlertCircle, Lightbulb, Bug, Folder } from 'lucide-react';
+
+// ─── 静态常量数据（组件外，避免每次渲染重新创建）
+
+// PPT整套模板数据
+const pptCompleteTemplates = [
+  { id: 1, name: '经管会汇报模版', desc: '适合汇报/述职/竞聘（逻辑框架+数据图表+...', views: '7.1W', thumbnail: '📊', tag: '热门', pages: 200, 
+    previewPages: [
+      { title: '封面', content: '经管会工作汇报', color: '#1e40af' },
+      { title: '目录', content: '01 工作回顾\n02 数据分析\n03 问题总结\n04 下步计划', color: '#1e3a8a' },
+      { title: '工作回顾', content: '本季度完成销售额 ¥2,580万\n同比增长 23.5%', color: '#1d4ed8' },
+      { title: '数据分析', content: '市场份额提升至 18.6%\n客户满意度 96.2%', color: '#2563eb' },
+      { title: '结尾', content: '感谢聆听', color: '#1e40af' },
+    ]
+  },
+  { id: 2, name: '月度/季度汇报模版', desc: '月度季度工作总结汇报模版｜数据可视化...', views: '4.2W', thumbnail: '📅', tag: '热门', pages: 200,
+    previewPages: [
+      { title: '封面', content: '2024年Q4季度汇报', color: '#047857' },
+      { title: '本月概览', content: '完成率 98.5%\n新增客户 126家', color: '#059669' },
+      { title: '业绩对比', content: '环比增长 15%\n同比增长 32%', color: '#10b981' },
+      { title: '下月计划', content: '目标销售额 ¥500万\n拓展新市场 3个', color: '#047857' },
+      { title: '结尾', content: '谢谢大家', color: '#065f46' },
+    ]
+  },
+  { id: 3, name: '销售年会汇报模版', desc: '年度销售总结｜业绩展示｜颁奖典礼...', views: '8.3W', thumbnail: '🏆', tag: '热门', pages: 150,
+    previewPages: [
+      { title: '封面', content: '2024年度销售年会', color: '#b91c1c' },
+      { title: '年度回顾', content: '全年销售额突破 ¥1.2亿\n团队人数增长 50%', color: '#dc2626' },
+      { title: '销售冠军', content: '🥇 张三 ¥1,580万\n🥈 李四 ¥1,230万\n🥉 王五 ¥980万', color: '#ef4444' },
+      { title: '明年目标', content: '销售目标 ¥2亿\n市场扩张 5个城市', color: '#b91c1c' },
+      { title: '结尾', content: '共创辉煌', color: '#991b1b' },
+    ]
+  },
+  { id: 4, name: '战略规划汇报模版', desc: '企业战略规划｜发展蓝图｜目标分解...', views: '29.2W', thumbnail: '🎯', tag: '热门', pages: 500,
+    previewPages: [
+      { title: '封面', content: '2025-2030战略规划', color: '#7c3aed' },
+      { title: '愿景使命', content: '成为行业领先的数据安全服务商', color: '#8b5cf6' },
+      { title: '战略目标', content: '营收增长 300%\n市场份额 25%\n客户数量 10,000+', color: '#a78bfa' },
+      { title: '实施路径', content: '第一阶段：夯实基础\n第二阶段：快速扩张\n第三阶段：行业领先', color: '#7c3aed' },
+      { title: '结尾', content: '携手共进', color: '#6d28d9' },
+    ]
+  },
+  { id: 5, name: '项目进度汇报模版', desc: '项目管理｜进度跟踪｜里程碑展示...', views: '3.8W', thumbnail: '📋', tag: '推荐', pages: 50,
+    previewPages: [
+      { title: '封面', content: '项目进度汇报', color: '#0891b2' },
+      { title: '项目概览', content: '项目名称：数据平台升级\n总工期：6个月\n当前进度：65%', color: '#06b6d4' },
+      { title: '里程碑', content: '✅ 需求分析\n✅ 系统设计\n🔄 开发测试\n⏳ 上线部署', color: '#22d3ee' },
+      { title: '风险预警', content: '资源风险：中\n技术风险：低\n进度风险：低', color: '#0891b2' },
+      { title: '结尾', content: '项目顺利推进中', color: '#0e7490' },
+    ]
+  },
+  { id: 6, name: '产品发布汇报模版', desc: '新品发布｜产品介绍｜功能亮点...', views: '5.6W', thumbnail: '🚀', tag: '推荐', pages: 200,
+    previewPages: [
+      { title: '封面', content: '新产品发布会', color: '#ea580c' },
+      { title: '产品介绍', content: '昂楷数据安全平台 V3.0\n全新架构 · 极致性能', color: '#f97316' },
+      { title: '核心功能', content: '🔒 数据加密\n🛡️ 访问控制\n📊 审计分析\n🚨 风险预警', color: '#fb923c' },
+      { title: '技术优势', content: '性能提升 200%\n部署时间缩短 50%', color: '#ea580c' },
+      { title: '结尾', content: '即刻体验', color: '#c2410c' },
+    ]
+  },
+  { id: 7, name: '技术方案汇报模版', desc: '技术架构｜解决方案｜实施方案...', views: '2.1W', thumbnail: '💻', tag: '推荐', pages: 150,
+    previewPages: [
+      { title: '封面', content: '技术方案汇报', color: '#4f46e5' },
+      { title: '需求分析', content: '业务痛点分析\n技术需求梳理', color: '#6366f1' },
+      { title: '技术架构', content: '微服务架构\n分布式部署\n高可用设计', color: '#818cf8' },
+      { title: '实施计划', content: '第1周：环境搭建\n第2-4周：核心开发\n第5周：测试上线', color: '#4f46e5' },
+      { title: '结尾', content: '技术驱动创新', color: '#4338ca' },
+    ]
+  },
+  { id: 8, name: '市场分析汇报模版', desc: '市场调研｜竞品分析｜趋势洞察...', views: '1.8W', thumbnail: '📈', tag: '推荐', pages: 150,
+    previewPages: [
+      { title: '封面', content: '市场分析报告', color: '#0d9488' },
+      { title: '市场规模', content: '2024年市场规模 ¥500亿\n年增长率 18.5%', color: '#14b8a6' },
+      { title: '竞品分析', content: '竞品A：市场份额 22%\n竞品B：市场份额 18%\n我司：市场份额 15%', color: '#2dd4bf' },
+      { title: '机会洞察', content: '新兴市场机会\n技术创新方向\n客户需求变化', color: '#0d9488' },
+      { title: '结尾', content: '把握机遇', color: '#0f766e' },
+    ]
+  },
+];
+
+// PPT单页版式数据
+const pptSingleTemplates = [
+  { id: 1, name: '封面页304-昂楷科技解决方案', views: '1W', thumbnail: '🌆', type: 'cover', previewContent: { title: '数据安全解决方案', subtitle: '昂楷科技', color: '#1e40af' } },
+  { id: 2, name: '封面页303-昂楷科技解决方案', views: '2417', thumbnail: '⚽', type: 'cover', previewContent: { title: '智能运维平台', subtitle: 'Smart Operations', color: '#047857' } },
+  { id: 3, name: '封面页302-昂楷科技解决方案', views: '1.1W', thumbnail: '🌾', type: 'cover', previewContent: { title: '企业数字化转型', subtitle: 'Digital Transformation', color: '#b45309' } },
+  { id: 4, name: '封面页301-昂楷科技解决方案', views: '6265', thumbnail: '📖', type: 'cover', previewContent: { title: '年度工作汇报', subtitle: '2024 Annual Report', color: '#7c3aed' } },
+  { id: 5, name: '封面页300-昂楷科技解决方案', views: '4780', thumbnail: '🎯', type: 'cover', previewContent: { title: '战略规划方案', subtitle: 'Strategic Planning', color: '#dc2626' } },
+  { id: 6, name: '一段内容页036-昂楷科技解决方案', views: '2613', thumbnail: '🏢', type: 'paragraph', previewContent: { title: '公司简介', content: '昂楷科技成立于2010年，是国内领先的数据安全服务商，专注于为企业提供全方位的数据保护解决方案。', color: '#0891b2' } },
+  { id: 7, name: '一段内容页035-昂楷科技解决方案', views: '1217', thumbnail: '🏯', type: 'paragraph', previewContent: { title: '核心优势', content: '• 10年+行业经验\n• 500+成功案例\n• 7x24小时服务', color: '#ea580c' } },
+  { id: 8, name: '一段内容页034-昂楷科技解决方案', views: '2186', thumbnail: '📱', type: 'paragraph', previewContent: { title: '服务范围', content: '数据加密、访问控制、安全审计、风险评估、合规咨询', color: '#4f46e5' } },
+  { id: 9, name: '产品展示页032-昂楷科技解决方案', views: '236', thumbnail: '💻', type: 'image', previewContent: { title: '产品展示', content: '昂楷数据安全平台 V3.0', color: '#0d9488' } },
+  { id: 10, name: '产品展示页031-昂楷科技解决方案', views: '2076', thumbnail: '🏗️', type: 'image', previewContent: { title: '解决方案架构', content: '分布式部署 · 高可用设计', color: '#6366f1' } },
+  { id: 11, name: '时间轴页042-昂楷科技解决方案', views: '2951', thumbnail: '📅', type: 'logic', previewContent: { title: '发展历程', content: '2010 创立\n2015 A轮融资\n2020 上市\n2024 国际化', color: '#8b5cf6' } },
+  { id: 12, name: '时间轴页026-昂楷科技解决方案', views: '2082', thumbnail: '📈', type: 'logic', previewContent: { title: '项目里程碑', content: 'Q1 需求分析\nQ2 开发测试\nQ3 试运行\nQ4 正式上线', color: '#059669' } },
+  { id: 13, name: '数据图表页066-昂楷科技解决方案', views: '651', thumbnail: '📊', type: 'chart', previewContent: { title: '销售数据', content: '月度销售趋势图\n环比增长 23%', color: '#dc2626' } },
+  { id: 14, name: '数据图表页065-昂楷科技解决方案', views: '1814', thumbnail: '📉', type: 'chart', previewContent: { title: '市场份额', content: '饼图展示\n市场占有率 18.6%', color: '#f59e0b' } },
+  { id: 15, name: '数据图表页064-昂楷科技解决方案', views: '2126', thumbnail: '🥧', type: 'chart', previewContent: { title: '客户分布', content: '金融 35%\n政府 28%\n企业 37%', color: '#10b981' } },
+];
+
+// PPT整套模板分类
+const pptCompleteCategories = [
+  { id: 'workplace', name: '职场场景' },
+  { id: 'creative', name: '创意主题' },
+  { id: 'animation', name: '动画库' },
+];
+
+const pptCompleteSubCategories = {
+  workplace: [
+    { id: 'report', name: '汇报' },
+    { id: 'solution', name: '解决方案' },
+    { id: 'product', name: '产品' },
+    { id: 'annual', name: '年会' },
+    { id: 'company', name: '企业介绍' },
+  ],
+  creative: [
+    { id: 'simple', name: '简约' },
+    { id: 'tech', name: '科技' },
+    { id: 'chinese', name: '中国风' },
+    { id: 'cartoon', name: '卡通' },
+  ],
+  animation: [
+    { id: 'basic', name: '基础动画' },
+    { id: 'advanced', name: '高级动画' },
+  ],
+};
+
+// PPT单页版式分类
+const pptSingleCategories = [
+  { id: 'essential', name: '必备', icon: Star },
+  { id: 'paragraph', name: '文段排版', icon: Type },
+  { id: 'image', name: '图片排版', icon: ImageIcon },
+  { id: 'logic', name: '逻辑图示', icon: GitBranch },
+  { id: 'chart', name: '数据图表', icon: PieChart },
+  { id: 'article', name: '文章专享', icon: FileText },
+];
+
+const pptSingleSubCategories = {
+  essential: [
+    { id: 'cover', name: '封面' },
+    { id: 'toc', name: '目录' },
+    { id: 'transition', name: '过渡' },
+    { id: 'ending', name: '结尾' },
+  ],
+  paragraph: [
+    { id: '1p', name: '1段' },
+    { id: '2p', name: '2段' },
+    { id: '3p', name: '3段' },
+    { id: '4p', name: '4段' },
+    { id: 'multi', name: '多段' },
+    { id: 'multiItem', name: '多项' },
+  ],
+  image: [
+    { id: 'product', name: '产品' },
+    { id: 'multiImg', name: '多图' },
+    { id: 'person', name: '人物' },
+    { id: 'screenshot', name: '截图' },
+    { id: 'honor', name: '荣誉' },
+    { id: 'logo', name: 'logo' },
+  ],
+  logic: [
+    { id: 'timeline', name: '时间轴' },
+    { id: 'structure', name: '架构' },
+    { id: 'flowchart', name: '逻辑图' },
+    { id: 'compare', name: '对比' },
+  ],
+  chart: [
+    { id: 'chartType', name: '图表' },
+    { id: 'table', name: '表格' },
+    { id: 'data', name: '数据' },
+    { id: 'map', name: '地图' },
+  ],
+  article: [
+    { id: 'quote', name: '引用' },
+    { id: 'highlight', name: '重点' },
+  ],
+};
+
+// 模拟素材数据 - 支持所有文件类型预览
+const assets = [
+  { 
+    id: 1, 
+    name: 'Ankki 品牌标准色卡', 
+    type: 'image', 
+    format: 'PNG', 
+    size: '2.4 MB', 
+    version: '3.2', 
+    updatedAt: '2024-01-15', 
+    updatedBy: '张设计', 
+    category: 'brand', 
+    downloads: 234, 
+    thumbnail: '🎨', 
+    status: 'approved',
+    imagePreview: {
+      colors: [
+        { name: '主色-橙', hex: '#D97757', rgb: '217, 119, 87' },
+        { name: '辅色-蓝', hex: '#1E40AF', rgb: '30, 64, 175' },
+        { name: '辅色-绿', hex: '#047857', rgb: '4, 120, 87' },
+        { name: '中性-深', hex: '#1A1A1A', rgb: '26, 26, 26' },
+        { name: '中性-浅', hex: '#F5F4F2', rgb: '245, 244, 242' },
+      ]
+    }
+  },
+  { 
+    id: 2, 
+    name: '2024年度品牌手册', 
+    type: 'document', 
+    format: 'PDF', 
+    size: '18.6 MB', 
+    version: '2.0', 
+    updatedAt: '2024-01-10', 
+    updatedBy: '李经理', 
+    category: 'guide', 
+    downloads: 567, 
+    thumbnail: '📘', 
+    status: 'approved',
+    pdfPreview: {
+      totalPages: 48,
+      pages: [
+        { num: 1, title: '封面', content: 'Ankki Design\n2024 品牌手册' },
+        { num: 2, title: '目录', content: '01 品牌理念\n02 视觉识别\n03 应用规范\n04 品牌资产' },
+        { num: 3, title: '品牌理念', content: '我们的使命是为企业提供\n最安全可靠的数据保护方案' },
+        { num: 4, title: '核心价值观', content: '创新 · 专业 · 信赖 · 共赢' },
+        { num: 5, title: '品牌故事', content: '成立于2010年，昂楷科技始终\n专注于数据安全领域...' },
+      ]
+    }
+  },
+  { 
+    id: 3, 
+    name: '产品宣传PPT模板', 
+    type: 'presentation', 
+    format: 'PPTX', 
+    size: '5.2 MB', 
+    version: '1.5', 
+    updatedAt: '2024-01-08', 
+    updatedBy: '王策划', 
+    category: 'template', 
+    downloads: 189, 
+    thumbnail: '📊', 
+    status: 'approved',
+    pptPreview: {
+      totalSlides: 25,
+      slides: [
+        { num: 1, title: '封面', content: '昂楷数据安全平台\n产品介绍', color: '#1E40AF' },
+        { num: 2, title: '公司简介', content: '国内领先的数据安全服务商\n500+成功案例', color: '#047857' },
+        { num: 3, title: '产品概述', content: '全方位数据保护\n一站式安全解决方案', color: '#7C3AED' },
+        { num: 4, title: '核心功能', content: '数据加密 | 访问控制\n安全审计 | 风险预警', color: '#DC2626' },
+        { num: 5, title: '联系我们', content: 'www.ankki.com\n400-xxx-xxxx', color: '#1E40AF' },
+      ]
+    }
+  },
+  { 
+    id: 4, 
+    name: '企业LOGO矢量文件', 
+    type: 'image', 
+    format: 'SVG', 
+    size: '0.8 MB', 
+    version: '4.0', 
+    updatedAt: '2024-01-05', 
+    updatedBy: '张设计', 
+    category: 'brand', 
+    downloads: 892, 
+    thumbnail: '✨', 
+    status: 'approved',
+    svgPreview: {
+      variants: [
+        { name: '标准版', bg: '#ffffff', color: '#D97757' },
+        { name: '深色版', bg: '#1A1A1A', color: '#ffffff' },
+        { name: '单色版', bg: '#F5F4F2', color: '#1A1A1A' },
+      ]
+    }
+  },
+  { 
+    id: 5, 
+    name: '社交媒体素材包', 
+    type: 'archive', 
+    format: 'ZIP', 
+    size: '45.3 MB', 
+    version: '2.1', 
+    updatedAt: '2024-01-03', 
+    updatedBy: '陈运营', 
+    category: 'marketing', 
+    downloads: 156, 
+    thumbnail: '📱', 
+    status: 'approved',
+    zipPreview: {
+      totalFiles: 36,
+      files: [
+        { name: '微信公众号封面_01.png', size: '1.2 MB', type: 'image' },
+        { name: '微信公众号封面_02.png', size: '1.1 MB', type: 'image' },
+        { name: '朋友圈海报_01.jpg', size: '2.3 MB', type: 'image' },
+        { name: '朋友圈海报_02.jpg', size: '2.1 MB', type: 'image' },
+        { name: '微博配图_01.png', size: '0.8 MB', type: 'image' },
+        { name: '微博配图_02.png', size: '0.9 MB', type: 'image' },
+        { name: '小红书封面_01.jpg', size: '1.5 MB', type: 'image' },
+        { name: '抖音封面_01.jpg', size: '1.8 MB', type: 'image' },
+        { name: '使用说明.txt', size: '2 KB', type: 'text' },
+      ]
+    }
+  },
+  { 
+    id: 6, 
+    name: '财务报表模板', 
+    type: 'spreadsheet', 
+    format: 'XLSX', 
+    size: '1.2 MB', 
+    version: '1.8', 
+    updatedAt: '2024-01-02', 
+    updatedBy: '刘财务', 
+    category: 'template', 
+    downloads: 78, 
+    thumbnail: '📈', 
+    status: 'approved',
+    excelData: {
+      sheetName: '2024年度财务报表',
+      headers: ['月份', '收入(万元)', '支出(万元)', '利润(万元)', '同比增长'],
+      rows: [
+        ['1月', '580', '420', '160', '+12%'],
+        ['2月', '620', '450', '170', '+15%'],
+        ['3月', '750', '520', '230', '+18%'],
+        ['4月', '680', '480', '200', '+10%'],
+        ['5月', '720', '510', '210', '+14%'],
+        ['6月', '890', '580', '310', '+22%'],
+      ]
+    }
+  },
+  { 
+    id: 7, 
+    name: '员工手册', 
+    type: 'document', 
+    format: 'DOCX', 
+    size: '3.5 MB', 
+    version: '2.3', 
+    updatedAt: '2024-01-01', 
+    updatedBy: '人事部', 
+    category: 'internal', 
+    downloads: 445, 
+    thumbnail: '📄', 
+    status: 'approved',
+    wordPreview: {
+      title: '昂楷科技员工手册',
+      totalPages: 32,
+      sections: [
+        { title: '第一章 公司简介', content: '昂楷科技成立于2010年，是国内领先的数据安全服务商。公司总部位于北京，在上海、深圳、成都设有分公司。' },
+        { title: '第二章 企业文化', content: '愿景：成为最值得信赖的数据安全专家\n使命：用技术守护数据价值\n价值观：创新、专业、信赖、共赢' },
+        { title: '第三章 规章制度', content: '3.1 考勤制度\n工作时间：9:00-18:00\n午休时间：12:00-13:30\n\n3.2 请假制度\n事假需提前1天申请...' },
+        { title: '第四章 薪酬福利', content: '4.1 薪资结构\n基本工资 + 绩效奖金 + 项目奖金\n\n4.2 福利待遇\n五险一金、带薪年假、节日福利...' },
+      ]
+    }
+  },
+  { 
+    id: 8, 
+    name: '销售数据统计表', 
+    type: 'spreadsheet', 
+    format: 'XLSX', 
+    size: '2.1 MB', 
+    version: '1.0', 
+    updatedAt: '2024-01-03', 
+    updatedBy: '销售部', 
+    category: 'internal', 
+    downloads: 234, 
+    thumbnail: '💰', 
+    status: 'approved',
+    excelData: {
+      sheetName: 'Q4销售数据',
+      headers: ['产品名称', '销售数量', '单价(元)', '销售额(万元)', '区域'],
+      rows: [
+        ['数据安全平台', '126', '50,000', '630', '华东'],
+        ['审计系统', '89', '30,000', '267', '华北'],
+        ['加密网关', '215', '15,000', '322.5', '华南'],
+        ['访问控制系统', '78', '25,000', '195', '西南'],
+        ['风险预警平台', '56', '40,000', '224', '华中'],
+      ]
+    }
+  },
+  { 
+    id: 9, 
+    name: '产品宣传图-主视觉', 
+    type: 'image', 
+    format: 'JPG', 
+    size: '4.8 MB', 
+    version: '1.2', 
+    updatedAt: '2024-01-06', 
+    updatedBy: '张设计', 
+    category: 'marketing', 
+    downloads: 321, 
+    thumbnail: '🖼️', 
+    status: 'approved',
+    imagePreview: {
+      dimensions: '3840 x 2160',
+      description: '产品主视觉宣传图，适用于官网首页、宣传册封面等场景',
+      colorMode: 'RGB',
+    }
+  },
+  { 
+    id: 10, 
+    name: '技术白皮书', 
+    type: 'document', 
+    format: 'PDF', 
+    size: '8.2 MB', 
+    version: '1.0', 
+    updatedAt: '2024-01-04', 
+    updatedBy: '技术部', 
+    category: 'guide', 
+    downloads: 189, 
+    thumbnail: '📑', 
+    status: 'approved',
+    pdfPreview: {
+      totalPages: 28,
+      pages: [
+        { num: 1, title: '封面', content: '数据安全技术白皮书\n昂楷科技 2024' },
+        { num: 2, title: '摘要', content: '本白皮书详细介绍了\n昂楷数据安全解决方案的\n技术架构与实现原理' },
+        { num: 3, title: '技术架构', content: '采用分布式微服务架构\n支持高可用、高并发场景' },
+        { num: 4, title: '核心算法', content: 'AES-256加密算法\n国密SM4算法支持' },
+        { num: 5, title: '部署方案', content: '支持私有云、公有云、混合云\n多种部署模式' },
+      ]
+    }
+  },
+  {
+    id: 11,
+    name: '昂楷科技解决方案总册',
+    type: 'document',
+    format: 'PDF',
+    size: '12.4 MB',
+    version: '3.0',
+    updatedAt: '2024-01-12',
+    updatedBy: '解决方案部',
+    category: 'guide',
+    downloads: 406,
+    thumbnail: '📘',
+    status: 'approved',
+    pdfPreview: {
+      totalPages: 36,
+      pages: [
+        { num: 1, title: '封面', content: '昂楷科技\n数据安全解决方案总册' },
+        { num: 2, title: '方案地图', content: '数据库审计\n数据脱敏\n运维安全\n风险预警' },
+        { num: 3, title: '行业场景', content: '金融、政务、能源、制造\n四大核心行业实践' },
+        { num: 4, title: '产品矩阵', content: '平台产品 + 行业方案 + 交付服务' },
+        { num: 5, title: '客户价值', content: '降低风险暴露\n提升合规效率\n缩短交付周期' },
+      ]
+    }
+  },
+  {
+    id: 12,
+    name: '数据库安全审计产品手册',
+    type: 'document',
+    format: 'PDF',
+    size: '9.6 MB',
+    version: '2.4',
+    updatedAt: '2024-01-11',
+    updatedBy: '产品市场部',
+    category: 'guide',
+    downloads: 332,
+    thumbnail: '📗',
+    status: 'approved',
+    pdfPreview: {
+      totalPages: 24,
+      pages: [
+        { num: 1, title: '封面', content: '数据库安全审计\n产品手册' },
+        { num: 2, title: '产品定位', content: '面向核心数据库资产的\n访问审计与风险识别平台' },
+        { num: 3, title: '核心能力', content: 'SQL 审计\n账号画像\n异常告警\n行为回溯' },
+        { num: 4, title: '部署方式', content: '旁路审计 · 集群扩展\n支持国产化环境' },
+      ]
+    }
+  },
+  {
+    id: 13,
+    name: '央国企数据安全治理汇报模板',
+    type: 'presentation',
+    format: 'PPTX',
+    size: '7.8 MB',
+    version: '1.7',
+    updatedAt: '2024-01-09',
+    updatedBy: '售前团队',
+    category: 'template',
+    downloads: 267,
+    thumbnail: '📊',
+    status: 'approved',
+    pptPreview: {
+      totalSlides: 18,
+      slides: [
+        { num: 1, title: '封面', content: '央国企数据安全治理\n年度汇报', color: '#1e3a8a' },
+        { num: 2, title: '治理背景', content: '政策趋严 · 资产复杂 · 审计提级', color: '#1d4ed8' },
+        { num: 3, title: '建设目标', content: '统一视图\n分级分域\n持续运营', color: '#2563eb' },
+        { num: 4, title: '实施路径', content: '制度梳理\n平台建设\n运营闭环', color: '#1e40af' },
+      ]
+    }
+  },
+  {
+    id: 14,
+    name: '合作伙伴赋能训练营 Deck',
+    type: 'presentation',
+    format: 'PPTX',
+    size: '6.1 MB',
+    version: '1.3',
+    updatedAt: '2024-01-07',
+    updatedBy: '渠道运营',
+    category: 'template',
+    downloads: 148,
+    thumbnail: '📙',
+    status: 'approved',
+    pptPreview: {
+      totalSlides: 22,
+      slides: [
+        { num: 1, title: '封面', content: '昂楷合作伙伴训练营', color: '#0f766e' },
+        { num: 2, title: '伙伴价值', content: '产品赋能 · 售前支撑 · 市场共创', color: '#059669' },
+        { num: 3, title: '销售打法', content: '商机识别\n客户画像\n方案落单', color: '#10b981' },
+        { num: 4, title: '激励政策', content: '返点政策\n认证体系\n联合营销', color: '#047857' },
+      ]
+    }
+  },
+  {
+    id: 15,
+    name: '客户成功案例集',
+    type: 'document',
+    format: 'DOCX',
+    size: '4.1 MB',
+    version: '1.6',
+    updatedAt: '2024-01-13',
+    updatedBy: '市场部',
+    category: 'internal',
+    downloads: 219,
+    thumbnail: '📄',
+    status: 'approved',
+    wordPreview: {
+      title: '昂楷科技客户成功案例集',
+      totalPages: 26,
+      sections: [
+        { title: '案例一 金融行业', content: '某股份制银行通过昂楷数据库审计平台，实现关键 SQL 行为可视、异常操作及时告警，审计闭环效率提升 68%。' },
+        { title: '案例二 制造行业', content: '某制造集团完成多厂区数据库纳管，建立统一策略模板，支撑跨区域审计联动与集团级报表汇总。' },
+        { title: '案例三 政务行业', content: '在政务云项目中完成国产数据库环境兼容适配，满足监管检查和等保合规要求。' },
+      ]
+    }
+  },
+  {
+    id: 16,
+    name: '售前项目立项模板',
+    type: 'document',
+    format: 'DOCX',
+    size: '2.7 MB',
+    version: '2.1',
+    updatedAt: '2024-01-14',
+    updatedBy: '售前管理组',
+    category: 'template',
+    downloads: 173,
+    thumbnail: '📄',
+    status: 'approved',
+    wordPreview: {
+      title: '售前项目立项模板',
+      totalPages: 14,
+      sections: [
+        { title: '项目概述', content: '记录客户背景、项目目标、关键时间节点和参与角色，帮助团队快速完成项目立项。' },
+        { title: '机会评估', content: '包含预算判断、竞争格局、风险项与赢单动作，适配解决方案型销售场景。' },
+        { title: '资源申请', content: '用于申请售前、研发、交付、市场等跨部门资源支持。' },
+      ]
+    }
+  },
+  {
+    id: 17,
+    name: '品牌海报主视觉合集',
+    type: 'image',
+    format: 'JPG',
+    size: '16.8 MB',
+    version: '1.9',
+    updatedAt: '2024-01-15',
+    updatedBy: '品牌设计组',
+    category: 'marketing',
+    downloads: 388,
+    thumbnail: '🖼️',
+    status: 'approved',
+    imagePreview: {
+      dimensions: '4961 x 3508',
+      description: '包含新品发布、年度峰会、客户案例和渠道招募等 12 张主视觉海报，可用于官网、会场与社媒传播。',
+      colorMode: 'CMYK / RGB',
+    }
+  },
+  {
+    id: 18,
+    name: '招投标资质文件包',
+    type: 'archive',
+    format: 'ZIP',
+    size: '58.4 MB',
+    version: '4.2',
+    updatedAt: '2024-01-15',
+    updatedBy: '商务支持',
+    category: 'internal',
+    downloads: 92,
+    thumbnail: '📦',
+    status: 'approved',
+    zipPreview: {
+      totalFiles: 42,
+      files: [
+        { name: '营业执照.pdf', size: '1.1 MB', type: 'document' },
+        { name: '高新技术企业证书.pdf', size: '2.0 MB', type: 'document' },
+        { name: 'ISO27001认证.pdf', size: '1.6 MB', type: 'document' },
+        { name: '典型案例清单.docx', size: '0.4 MB', type: 'document' },
+      ]
+    }
+  },
+  {
+    id: 19,
+    name: '行业线索周报数据表',
+    type: 'spreadsheet',
+    format: 'XLSX',
+    size: '1.9 MB',
+    version: '1.1',
+    updatedAt: '2024-01-15',
+    updatedBy: '市场运营',
+    category: 'internal',
+    downloads: 141,
+    thumbnail: '📈',
+    status: 'approved',
+    excelData: {
+      sheetName: '线索周报',
+      headers: ['行业', '新增线索', '有效商机', '转方案', '赢单率'],
+      rows: [
+        ['金融', '36', '18', '9', '22%'],
+        ['制造', '28', '14', '7', '18%'],
+        ['政务', '22', '10', '5', '16%'],
+        ['能源', '16', '8', '4', '19%'],
+      ]
+    }
+  },
+  {
+    id: 20,
+    name: '昂楷科技品牌应用规范',
+    type: 'document',
+    format: 'PDF',
+    size: '14.2 MB',
+    version: '3.5',
+    updatedAt: '2024-01-16',
+    updatedBy: '品牌中心',
+    category: 'brand',
+    downloads: 512,
+    thumbnail: '📕',
+    status: 'approved',
+    pdfPreview: {
+      totalPages: 42,
+      pages: [
+        { num: 1, title: '封面', content: '昂楷科技\n品牌应用规范' },
+        { num: 2, title: '品牌基调', content: '专业 · 稳健 · 技术可信赖' },
+        { num: 3, title: 'Logo 规范', content: '标准比例、保护区与错误示范' },
+        { num: 4, title: '版式系统', content: '封面、海报、展板和演示文稿规范' },
+      ]
+    }
+  },
+];
+
+const categories = [
+  { id: 'all', name: '全部素材', icon: FolderOpen, count: 156 },
+  { id: 'brand', name: '品牌素材', icon: Star, count: 24, children: [
+    { id: 'brand-logo', name: 'Logo标志', count: 8 },
+    { id: 'brand-color', name: '色卡规范', count: 6 },
+    { id: 'brand-font', name: '字体文件', count: 5 },
+    { id: 'brand-vi', name: 'VI规范', count: 5 },
+  ]},
+  { id: 'template', name: '模板文件', icon: FileText, count: 38, children: [
+    { id: 'template-word', name: 'Word模板', count: 12 },
+    { id: 'template-excel', name: 'Excel模板', count: 15 },
+    { id: 'template-contract', name: '合同模板', count: 11 },
+  ]},
+  { id: 'ppt', name: 'PPT模版', icon: Presentation, count: 520, isSpecial: true, children: [
+    { id: 'ppt-complete', name: '整套模板', count: 200, badge: '热门' },
+    { id: 'ppt-single', name: '单页版式', count: 320 },
+  ]},
+  { id: 'guide', name: '规范指南', icon: Bookmark, count: 15, children: [
+    { id: 'guide-brand', name: '品牌手册', count: 5 },
+    { id: 'guide-design', name: '设计规范', count: 6 },
+    { id: 'guide-tech', name: '技术文档', count: 4 },
+  ]},
+  { id: 'marketing', name: '营销素材', icon: Image, count: 67, children: [
+    { id: 'marketing-poster', name: '海报设计', count: 25 },
+    { id: 'marketing-banner', name: '横幅广告', count: 20 },
+    { id: 'marketing-social', name: '社交媒体', count: 22 },
+  ]},
+  { id: 'internal', name: '内部文档', icon: Shield, count: 12 },
+];
+
+const stats = [
+  { label: '总素材数', value: '1,256', change: '+23', icon: FolderOpen },
+  { label: '本月下载', value: '3,847', change: '+12%', icon: Download },
+  { label: '待审核', value: '8', change: '-3', icon: Clock },
+  { label: '活跃用户', value: '89', change: '+5', icon: Users },
+];
 
 // Ankki Design - 企业视觉素材管理平台 V2
 export default function AnkkiDesignV2() {
@@ -25,15 +707,15 @@ export default function AnkkiDesignV2() {
   // 当前选中的子分类
   const [selectedSubCategory, setSelectedSubCategory] = useState(null);
   
-  // 权限检查函数
-  const hasPermission = (permission) => {
+  // 权限检查函数（useCallback 避免子组件不必要重渲染）
+  const hasPermission = useCallback((permission) => {
     const permissions = {
       superadmin: ['all', 'manage_admins', 'manage_users', 'upload', 'delete', 'edit', 'view', 'audit', 'settings', 'stats'],
       admin: ['upload', 'delete', 'edit', 'view', 'audit', 'stats'],
       user: ['view', 'download'],
     };
     return permissions[currentUser.role]?.includes(permission) || permissions[currentUser.role]?.includes('all');
-  };
+  }, [currentUser.role]);
   
   // 是否是超级管理员
   const isSuperAdmin = currentUser.role === 'superadmin';
@@ -735,685 +1417,6 @@ export default function AnkkiDesignV2() {
     );
   };
 
-  // PPT整套模板数据
-  const pptCompleteTemplates = [
-    { id: 1, name: '经管会汇报模版', desc: '适合汇报/述职/竞聘（逻辑框架+数据图表+...', views: '7.1W', thumbnail: '📊', tag: '热门', pages: 200, 
-      previewPages: [
-        { title: '封面', content: '经管会工作汇报', color: '#1e40af' },
-        { title: '目录', content: '01 工作回顾\n02 数据分析\n03 问题总结\n04 下步计划', color: '#1e3a8a' },
-        { title: '工作回顾', content: '本季度完成销售额 ¥2,580万\n同比增长 23.5%', color: '#1d4ed8' },
-        { title: '数据分析', content: '市场份额提升至 18.6%\n客户满意度 96.2%', color: '#2563eb' },
-        { title: '结尾', content: '感谢聆听', color: '#1e40af' },
-      ]
-    },
-    { id: 2, name: '月度/季度汇报模版', desc: '月度季度工作总结汇报模版｜数据可视化...', views: '4.2W', thumbnail: '📅', tag: '热门', pages: 200,
-      previewPages: [
-        { title: '封面', content: '2024年Q4季度汇报', color: '#047857' },
-        { title: '本月概览', content: '完成率 98.5%\n新增客户 126家', color: '#059669' },
-        { title: '业绩对比', content: '环比增长 15%\n同比增长 32%', color: '#10b981' },
-        { title: '下月计划', content: '目标销售额 ¥500万\n拓展新市场 3个', color: '#047857' },
-        { title: '结尾', content: '谢谢大家', color: '#065f46' },
-      ]
-    },
-    { id: 3, name: '销售年会汇报模版', desc: '年度销售总结｜业绩展示｜颁奖典礼...', views: '8.3W', thumbnail: '🏆', tag: '热门', pages: 150,
-      previewPages: [
-        { title: '封面', content: '2024年度销售年会', color: '#b91c1c' },
-        { title: '年度回顾', content: '全年销售额突破 ¥1.2亿\n团队人数增长 50%', color: '#dc2626' },
-        { title: '销售冠军', content: '🥇 张三 ¥1,580万\n🥈 李四 ¥1,230万\n🥉 王五 ¥980万', color: '#ef4444' },
-        { title: '明年目标', content: '销售目标 ¥2亿\n市场扩张 5个城市', color: '#b91c1c' },
-        { title: '结尾', content: '共创辉煌', color: '#991b1b' },
-      ]
-    },
-    { id: 4, name: '战略规划汇报模版', desc: '企业战略规划｜发展蓝图｜目标分解...', views: '29.2W', thumbnail: '🎯', tag: '热门', pages: 500,
-      previewPages: [
-        { title: '封面', content: '2025-2030战略规划', color: '#7c3aed' },
-        { title: '愿景使命', content: '成为行业领先的数据安全服务商', color: '#8b5cf6' },
-        { title: '战略目标', content: '营收增长 300%\n市场份额 25%\n客户数量 10,000+', color: '#a78bfa' },
-        { title: '实施路径', content: '第一阶段：夯实基础\n第二阶段：快速扩张\n第三阶段：行业领先', color: '#7c3aed' },
-        { title: '结尾', content: '携手共进', color: '#6d28d9' },
-      ]
-    },
-    { id: 5, name: '项目进度汇报模版', desc: '项目管理｜进度跟踪｜里程碑展示...', views: '3.8W', thumbnail: '📋', tag: '推荐', pages: 50,
-      previewPages: [
-        { title: '封面', content: '项目进度汇报', color: '#0891b2' },
-        { title: '项目概览', content: '项目名称：数据平台升级\n总工期：6个月\n当前进度：65%', color: '#06b6d4' },
-        { title: '里程碑', content: '✅ 需求分析\n✅ 系统设计\n🔄 开发测试\n⏳ 上线部署', color: '#22d3ee' },
-        { title: '风险预警', content: '资源风险：中\n技术风险：低\n进度风险：低', color: '#0891b2' },
-        { title: '结尾', content: '项目顺利推进中', color: '#0e7490' },
-      ]
-    },
-    { id: 6, name: '产品发布汇报模版', desc: '新品发布｜产品介绍｜功能亮点...', views: '5.6W', thumbnail: '🚀', tag: '推荐', pages: 200,
-      previewPages: [
-        { title: '封面', content: '新产品发布会', color: '#ea580c' },
-        { title: '产品介绍', content: '昂楷数据安全平台 V3.0\n全新架构 · 极致性能', color: '#f97316' },
-        { title: '核心功能', content: '🔒 数据加密\n🛡️ 访问控制\n📊 审计分析\n🚨 风险预警', color: '#fb923c' },
-        { title: '技术优势', content: '性能提升 200%\n部署时间缩短 50%', color: '#ea580c' },
-        { title: '结尾', content: '即刻体验', color: '#c2410c' },
-      ]
-    },
-    { id: 7, name: '技术方案汇报模版', desc: '技术架构｜解决方案｜实施方案...', views: '2.1W', thumbnail: '💻', tag: '推荐', pages: 150,
-      previewPages: [
-        { title: '封面', content: '技术方案汇报', color: '#4f46e5' },
-        { title: '需求分析', content: '业务痛点分析\n技术需求梳理', color: '#6366f1' },
-        { title: '技术架构', content: '微服务架构\n分布式部署\n高可用设计', color: '#818cf8' },
-        { title: '实施计划', content: '第1周：环境搭建\n第2-4周：核心开发\n第5周：测试上线', color: '#4f46e5' },
-        { title: '结尾', content: '技术驱动创新', color: '#4338ca' },
-      ]
-    },
-    { id: 8, name: '市场分析汇报模版', desc: '市场调研｜竞品分析｜趋势洞察...', views: '1.8W', thumbnail: '📈', tag: '推荐', pages: 150,
-      previewPages: [
-        { title: '封面', content: '市场分析报告', color: '#0d9488' },
-        { title: '市场规模', content: '2024年市场规模 ¥500亿\n年增长率 18.5%', color: '#14b8a6' },
-        { title: '竞品分析', content: '竞品A：市场份额 22%\n竞品B：市场份额 18%\n我司：市场份额 15%', color: '#2dd4bf' },
-        { title: '机会洞察', content: '新兴市场机会\n技术创新方向\n客户需求变化', color: '#0d9488' },
-        { title: '结尾', content: '把握机遇', color: '#0f766e' },
-      ]
-    },
-  ];
-
-  // PPT单页版式数据
-  const pptSingleTemplates = [
-    { id: 1, name: '封面页304-昂楷科技解决方案', views: '1W', thumbnail: '🌆', type: 'cover', previewContent: { title: '数据安全解决方案', subtitle: '昂楷科技', color: '#1e40af' } },
-    { id: 2, name: '封面页303-昂楷科技解决方案', views: '2417', thumbnail: '⚽', type: 'cover', previewContent: { title: '智能运维平台', subtitle: 'Smart Operations', color: '#047857' } },
-    { id: 3, name: '封面页302-昂楷科技解决方案', views: '1.1W', thumbnail: '🌾', type: 'cover', previewContent: { title: '企业数字化转型', subtitle: 'Digital Transformation', color: '#b45309' } },
-    { id: 4, name: '封面页301-昂楷科技解决方案', views: '6265', thumbnail: '📖', type: 'cover', previewContent: { title: '年度工作汇报', subtitle: '2024 Annual Report', color: '#7c3aed' } },
-    { id: 5, name: '封面页300-昂楷科技解决方案', views: '4780', thumbnail: '🎯', type: 'cover', previewContent: { title: '战略规划方案', subtitle: 'Strategic Planning', color: '#dc2626' } },
-    { id: 6, name: '一段内容页036-昂楷科技解决方案', views: '2613', thumbnail: '🏢', type: 'paragraph', previewContent: { title: '公司简介', content: '昂楷科技成立于2010年，是国内领先的数据安全服务商，专注于为企业提供全方位的数据保护解决方案。', color: '#0891b2' } },
-    { id: 7, name: '一段内容页035-昂楷科技解决方案', views: '1217', thumbnail: '🏯', type: 'paragraph', previewContent: { title: '核心优势', content: '• 10年+行业经验\n• 500+成功案例\n• 7x24小时服务', color: '#ea580c' } },
-    { id: 8, name: '一段内容页034-昂楷科技解决方案', views: '2186', thumbnail: '📱', type: 'paragraph', previewContent: { title: '服务范围', content: '数据加密、访问控制、安全审计、风险评估、合规咨询', color: '#4f46e5' } },
-    { id: 9, name: '产品展示页032-昂楷科技解决方案', views: '236', thumbnail: '💻', type: 'image', previewContent: { title: '产品展示', content: '昂楷数据安全平台 V3.0', color: '#0d9488' } },
-    { id: 10, name: '产品展示页031-昂楷科技解决方案', views: '2076', thumbnail: '🏗️', type: 'image', previewContent: { title: '解决方案架构', content: '分布式部署 · 高可用设计', color: '#6366f1' } },
-    { id: 11, name: '时间轴页042-昂楷科技解决方案', views: '2951', thumbnail: '📅', type: 'logic', previewContent: { title: '发展历程', content: '2010 创立\n2015 A轮融资\n2020 上市\n2024 国际化', color: '#8b5cf6' } },
-    { id: 12, name: '时间轴页026-昂楷科技解决方案', views: '2082', thumbnail: '📈', type: 'logic', previewContent: { title: '项目里程碑', content: 'Q1 需求分析\nQ2 开发测试\nQ3 试运行\nQ4 正式上线', color: '#059669' } },
-    { id: 13, name: '数据图表页066-昂楷科技解决方案', views: '651', thumbnail: '📊', type: 'chart', previewContent: { title: '销售数据', content: '月度销售趋势图\n环比增长 23%', color: '#dc2626' } },
-    { id: 14, name: '数据图表页065-昂楷科技解决方案', views: '1814', thumbnail: '📉', type: 'chart', previewContent: { title: '市场份额', content: '饼图展示\n市场占有率 18.6%', color: '#f59e0b' } },
-    { id: 15, name: '数据图表页064-昂楷科技解决方案', views: '2126', thumbnail: '🥧', type: 'chart', previewContent: { title: '客户分布', content: '金融 35%\n政府 28%\n企业 37%', color: '#10b981' } },
-  ];
-
-  // PPT整套模板分类
-  const pptCompleteCategories = [
-    { id: 'workplace', name: '职场场景' },
-    { id: 'creative', name: '创意主题' },
-    { id: 'animation', name: '动画库' },
-  ];
-
-  const pptCompleteSubCategories = {
-    workplace: [
-      { id: 'report', name: '汇报' },
-      { id: 'solution', name: '解决方案' },
-      { id: 'product', name: '产品' },
-      { id: 'annual', name: '年会' },
-      { id: 'company', name: '企业介绍' },
-    ],
-    creative: [
-      { id: 'simple', name: '简约' },
-      { id: 'tech', name: '科技' },
-      { id: 'chinese', name: '中国风' },
-      { id: 'cartoon', name: '卡通' },
-    ],
-    animation: [
-      { id: 'basic', name: '基础动画' },
-      { id: 'advanced', name: '高级动画' },
-    ],
-  };
-
-  // PPT单页版式分类
-  const pptSingleCategories = [
-    { id: 'essential', name: '必备', icon: Star },
-    { id: 'paragraph', name: '文段排版', icon: Type },
-    { id: 'image', name: '图片排版', icon: ImageIcon },
-    { id: 'logic', name: '逻辑图示', icon: GitBranch },
-    { id: 'chart', name: '数据图表', icon: PieChart },
-    { id: 'article', name: '文章专享', icon: FileText },
-  ];
-
-  const pptSingleSubCategories = {
-    essential: [
-      { id: 'cover', name: '封面' },
-      { id: 'toc', name: '目录' },
-      { id: 'transition', name: '过渡' },
-      { id: 'ending', name: '结尾' },
-    ],
-    paragraph: [
-      { id: '1p', name: '1段' },
-      { id: '2p', name: '2段' },
-      { id: '3p', name: '3段' },
-      { id: '4p', name: '4段' },
-      { id: 'multi', name: '多段' },
-      { id: 'multiItem', name: '多项' },
-    ],
-    image: [
-      { id: 'product', name: '产品' },
-      { id: 'multiImg', name: '多图' },
-      { id: 'person', name: '人物' },
-      { id: 'screenshot', name: '截图' },
-      { id: 'honor', name: '荣誉' },
-      { id: 'logo', name: 'logo' },
-    ],
-    logic: [
-      { id: 'timeline', name: '时间轴' },
-      { id: 'structure', name: '架构' },
-      { id: 'flowchart', name: '逻辑图' },
-      { id: 'compare', name: '对比' },
-    ],
-    chart: [
-      { id: 'chartType', name: '图表' },
-      { id: 'table', name: '表格' },
-      { id: 'data', name: '数据' },
-      { id: 'map', name: '地图' },
-    ],
-    article: [
-      { id: 'quote', name: '引用' },
-      { id: 'highlight', name: '重点' },
-    ],
-  };
-
-  // 模拟素材数据 - 支持所有文件类型预览
-  const assets = [
-    { 
-      id: 1, 
-      name: 'Ankki 品牌标准色卡', 
-      type: 'image', 
-      format: 'PNG', 
-      size: '2.4 MB', 
-      version: '3.2', 
-      updatedAt: '2024-01-15', 
-      updatedBy: '张设计', 
-      category: 'brand', 
-      downloads: 234, 
-      thumbnail: '🎨', 
-      status: 'approved',
-      imagePreview: {
-        colors: [
-          { name: '主色-橙', hex: '#D97757', rgb: '217, 119, 87' },
-          { name: '辅色-蓝', hex: '#1E40AF', rgb: '30, 64, 175' },
-          { name: '辅色-绿', hex: '#047857', rgb: '4, 120, 87' },
-          { name: '中性-深', hex: '#1A1A1A', rgb: '26, 26, 26' },
-          { name: '中性-浅', hex: '#F5F4F2', rgb: '245, 244, 242' },
-        ]
-      }
-    },
-    { 
-      id: 2, 
-      name: '2024年度品牌手册', 
-      type: 'document', 
-      format: 'PDF', 
-      size: '18.6 MB', 
-      version: '2.0', 
-      updatedAt: '2024-01-10', 
-      updatedBy: '李经理', 
-      category: 'guide', 
-      downloads: 567, 
-      thumbnail: '📘', 
-      status: 'approved',
-      pdfPreview: {
-        totalPages: 48,
-        pages: [
-          { num: 1, title: '封面', content: 'Ankki Design\n2024 品牌手册' },
-          { num: 2, title: '目录', content: '01 品牌理念\n02 视觉识别\n03 应用规范\n04 品牌资产' },
-          { num: 3, title: '品牌理念', content: '我们的使命是为企业提供\n最安全可靠的数据保护方案' },
-          { num: 4, title: '核心价值观', content: '创新 · 专业 · 信赖 · 共赢' },
-          { num: 5, title: '品牌故事', content: '成立于2010年，昂楷科技始终\n专注于数据安全领域...' },
-        ]
-      }
-    },
-    { 
-      id: 3, 
-      name: '产品宣传PPT模板', 
-      type: 'presentation', 
-      format: 'PPTX', 
-      size: '5.2 MB', 
-      version: '1.5', 
-      updatedAt: '2024-01-08', 
-      updatedBy: '王策划', 
-      category: 'template', 
-      downloads: 189, 
-      thumbnail: '📊', 
-      status: 'approved',
-      pptPreview: {
-        totalSlides: 25,
-        slides: [
-          { num: 1, title: '封面', content: '昂楷数据安全平台\n产品介绍', color: '#1E40AF' },
-          { num: 2, title: '公司简介', content: '国内领先的数据安全服务商\n500+成功案例', color: '#047857' },
-          { num: 3, title: '产品概述', content: '全方位数据保护\n一站式安全解决方案', color: '#7C3AED' },
-          { num: 4, title: '核心功能', content: '数据加密 | 访问控制\n安全审计 | 风险预警', color: '#DC2626' },
-          { num: 5, title: '联系我们', content: 'www.ankki.com\n400-xxx-xxxx', color: '#1E40AF' },
-        ]
-      }
-    },
-    { 
-      id: 4, 
-      name: '企业LOGO矢量文件', 
-      type: 'image', 
-      format: 'SVG', 
-      size: '0.8 MB', 
-      version: '4.0', 
-      updatedAt: '2024-01-05', 
-      updatedBy: '张设计', 
-      category: 'brand', 
-      downloads: 892, 
-      thumbnail: '✨', 
-      status: 'approved',
-      svgPreview: {
-        variants: [
-          { name: '标准版', bg: '#ffffff', color: '#D97757' },
-          { name: '深色版', bg: '#1A1A1A', color: '#ffffff' },
-          { name: '单色版', bg: '#F5F4F2', color: '#1A1A1A' },
-        ]
-      }
-    },
-    { 
-      id: 5, 
-      name: '社交媒体素材包', 
-      type: 'archive', 
-      format: 'ZIP', 
-      size: '45.3 MB', 
-      version: '2.1', 
-      updatedAt: '2024-01-03', 
-      updatedBy: '陈运营', 
-      category: 'marketing', 
-      downloads: 156, 
-      thumbnail: '📱', 
-      status: 'approved',
-      zipPreview: {
-        totalFiles: 36,
-        files: [
-          { name: '微信公众号封面_01.png', size: '1.2 MB', type: 'image' },
-          { name: '微信公众号封面_02.png', size: '1.1 MB', type: 'image' },
-          { name: '朋友圈海报_01.jpg', size: '2.3 MB', type: 'image' },
-          { name: '朋友圈海报_02.jpg', size: '2.1 MB', type: 'image' },
-          { name: '微博配图_01.png', size: '0.8 MB', type: 'image' },
-          { name: '微博配图_02.png', size: '0.9 MB', type: 'image' },
-          { name: '小红书封面_01.jpg', size: '1.5 MB', type: 'image' },
-          { name: '抖音封面_01.jpg', size: '1.8 MB', type: 'image' },
-          { name: '使用说明.txt', size: '2 KB', type: 'text' },
-        ]
-      }
-    },
-    { 
-      id: 6, 
-      name: '财务报表模板', 
-      type: 'spreadsheet', 
-      format: 'XLSX', 
-      size: '1.2 MB', 
-      version: '1.8', 
-      updatedAt: '2024-01-02', 
-      updatedBy: '刘财务', 
-      category: 'template', 
-      downloads: 78, 
-      thumbnail: '📈', 
-      status: 'approved',
-      excelData: {
-        sheetName: '2024年度财务报表',
-        headers: ['月份', '收入(万元)', '支出(万元)', '利润(万元)', '同比增长'],
-        rows: [
-          ['1月', '580', '420', '160', '+12%'],
-          ['2月', '620', '450', '170', '+15%'],
-          ['3月', '750', '520', '230', '+18%'],
-          ['4月', '680', '480', '200', '+10%'],
-          ['5月', '720', '510', '210', '+14%'],
-          ['6月', '890', '580', '310', '+22%'],
-        ]
-      }
-    },
-    { 
-      id: 7, 
-      name: '员工手册', 
-      type: 'document', 
-      format: 'DOCX', 
-      size: '3.5 MB', 
-      version: '2.3', 
-      updatedAt: '2024-01-01', 
-      updatedBy: '人事部', 
-      category: 'internal', 
-      downloads: 445, 
-      thumbnail: '📄', 
-      status: 'approved',
-      wordPreview: {
-        title: '昂楷科技员工手册',
-        totalPages: 32,
-        sections: [
-          { title: '第一章 公司简介', content: '昂楷科技成立于2010年，是国内领先的数据安全服务商。公司总部位于北京，在上海、深圳、成都设有分公司。' },
-          { title: '第二章 企业文化', content: '愿景：成为最值得信赖的数据安全专家\n使命：用技术守护数据价值\n价值观：创新、专业、信赖、共赢' },
-          { title: '第三章 规章制度', content: '3.1 考勤制度\n工作时间：9:00-18:00\n午休时间：12:00-13:30\n\n3.2 请假制度\n事假需提前1天申请...' },
-          { title: '第四章 薪酬福利', content: '4.1 薪资结构\n基本工资 + 绩效奖金 + 项目奖金\n\n4.2 福利待遇\n五险一金、带薪年假、节日福利...' },
-        ]
-      }
-    },
-    { 
-      id: 8, 
-      name: '销售数据统计表', 
-      type: 'spreadsheet', 
-      format: 'XLSX', 
-      size: '2.1 MB', 
-      version: '1.0', 
-      updatedAt: '2024-01-03', 
-      updatedBy: '销售部', 
-      category: 'internal', 
-      downloads: 234, 
-      thumbnail: '💰', 
-      status: 'approved',
-      excelData: {
-        sheetName: 'Q4销售数据',
-        headers: ['产品名称', '销售数量', '单价(元)', '销售额(万元)', '区域'],
-        rows: [
-          ['数据安全平台', '126', '50,000', '630', '华东'],
-          ['审计系统', '89', '30,000', '267', '华北'],
-          ['加密网关', '215', '15,000', '322.5', '华南'],
-          ['访问控制系统', '78', '25,000', '195', '西南'],
-          ['风险预警平台', '56', '40,000', '224', '华中'],
-        ]
-      }
-    },
-    { 
-      id: 9, 
-      name: '产品宣传图-主视觉', 
-      type: 'image', 
-      format: 'JPG', 
-      size: '4.8 MB', 
-      version: '1.2', 
-      updatedAt: '2024-01-06', 
-      updatedBy: '张设计', 
-      category: 'marketing', 
-      downloads: 321, 
-      thumbnail: '🖼️', 
-      status: 'approved',
-      imagePreview: {
-        dimensions: '3840 x 2160',
-        description: '产品主视觉宣传图，适用于官网首页、宣传册封面等场景',
-        colorMode: 'RGB',
-      }
-    },
-    { 
-      id: 10, 
-      name: '技术白皮书', 
-      type: 'document', 
-      format: 'PDF', 
-      size: '8.2 MB', 
-      version: '1.0', 
-      updatedAt: '2024-01-04', 
-      updatedBy: '技术部', 
-      category: 'guide', 
-      downloads: 189, 
-      thumbnail: '📑', 
-      status: 'approved',
-      pdfPreview: {
-        totalPages: 28,
-        pages: [
-          { num: 1, title: '封面', content: '数据安全技术白皮书\n昂楷科技 2024' },
-          { num: 2, title: '摘要', content: '本白皮书详细介绍了\n昂楷数据安全解决方案的\n技术架构与实现原理' },
-          { num: 3, title: '技术架构', content: '采用分布式微服务架构\n支持高可用、高并发场景' },
-          { num: 4, title: '核心算法', content: 'AES-256加密算法\n国密SM4算法支持' },
-          { num: 5, title: '部署方案', content: '支持私有云、公有云、混合云\n多种部署模式' },
-        ]
-      }
-    },
-    {
-      id: 11,
-      name: '昂楷科技解决方案总册',
-      type: 'document',
-      format: 'PDF',
-      size: '12.4 MB',
-      version: '3.0',
-      updatedAt: '2024-01-12',
-      updatedBy: '解决方案部',
-      category: 'guide',
-      downloads: 406,
-      thumbnail: '📘',
-      status: 'approved',
-      pdfPreview: {
-        totalPages: 36,
-        pages: [
-          { num: 1, title: '封面', content: '昂楷科技\n数据安全解决方案总册' },
-          { num: 2, title: '方案地图', content: '数据库审计\n数据脱敏\n运维安全\n风险预警' },
-          { num: 3, title: '行业场景', content: '金融、政务、能源、制造\n四大核心行业实践' },
-          { num: 4, title: '产品矩阵', content: '平台产品 + 行业方案 + 交付服务' },
-          { num: 5, title: '客户价值', content: '降低风险暴露\n提升合规效率\n缩短交付周期' },
-        ]
-      }
-    },
-    {
-      id: 12,
-      name: '数据库安全审计产品手册',
-      type: 'document',
-      format: 'PDF',
-      size: '9.6 MB',
-      version: '2.4',
-      updatedAt: '2024-01-11',
-      updatedBy: '产品市场部',
-      category: 'guide',
-      downloads: 332,
-      thumbnail: '📗',
-      status: 'approved',
-      pdfPreview: {
-        totalPages: 24,
-        pages: [
-          { num: 1, title: '封面', content: '数据库安全审计\n产品手册' },
-          { num: 2, title: '产品定位', content: '面向核心数据库资产的\n访问审计与风险识别平台' },
-          { num: 3, title: '核心能力', content: 'SQL 审计\n账号画像\n异常告警\n行为回溯' },
-          { num: 4, title: '部署方式', content: '旁路审计 · 集群扩展\n支持国产化环境' },
-        ]
-      }
-    },
-    {
-      id: 13,
-      name: '央国企数据安全治理汇报模板',
-      type: 'presentation',
-      format: 'PPTX',
-      size: '7.8 MB',
-      version: '1.7',
-      updatedAt: '2024-01-09',
-      updatedBy: '售前团队',
-      category: 'template',
-      downloads: 267,
-      thumbnail: '📊',
-      status: 'approved',
-      pptPreview: {
-        totalSlides: 18,
-        slides: [
-          { num: 1, title: '封面', content: '央国企数据安全治理\n年度汇报', color: '#1e3a8a' },
-          { num: 2, title: '治理背景', content: '政策趋严 · 资产复杂 · 审计提级', color: '#1d4ed8' },
-          { num: 3, title: '建设目标', content: '统一视图\n分级分域\n持续运营', color: '#2563eb' },
-          { num: 4, title: '实施路径', content: '制度梳理\n平台建设\n运营闭环', color: '#1e40af' },
-        ]
-      }
-    },
-    {
-      id: 14,
-      name: '合作伙伴赋能训练营 Deck',
-      type: 'presentation',
-      format: 'PPTX',
-      size: '6.1 MB',
-      version: '1.3',
-      updatedAt: '2024-01-07',
-      updatedBy: '渠道运营',
-      category: 'template',
-      downloads: 148,
-      thumbnail: '📙',
-      status: 'approved',
-      pptPreview: {
-        totalSlides: 22,
-        slides: [
-          { num: 1, title: '封面', content: '昂楷合作伙伴训练营', color: '#0f766e' },
-          { num: 2, title: '伙伴价值', content: '产品赋能 · 售前支撑 · 市场共创', color: '#059669' },
-          { num: 3, title: '销售打法', content: '商机识别\n客户画像\n方案落单', color: '#10b981' },
-          { num: 4, title: '激励政策', content: '返点政策\n认证体系\n联合营销', color: '#047857' },
-        ]
-      }
-    },
-    {
-      id: 15,
-      name: '客户成功案例集',
-      type: 'document',
-      format: 'DOCX',
-      size: '4.1 MB',
-      version: '1.6',
-      updatedAt: '2024-01-13',
-      updatedBy: '市场部',
-      category: 'internal',
-      downloads: 219,
-      thumbnail: '📄',
-      status: 'approved',
-      wordPreview: {
-        title: '昂楷科技客户成功案例集',
-        totalPages: 26,
-        sections: [
-          { title: '案例一 金融行业', content: '某股份制银行通过昂楷数据库审计平台，实现关键 SQL 行为可视、异常操作及时告警，审计闭环效率提升 68%。' },
-          { title: '案例二 制造行业', content: '某制造集团完成多厂区数据库纳管，建立统一策略模板，支撑跨区域审计联动与集团级报表汇总。' },
-          { title: '案例三 政务行业', content: '在政务云项目中完成国产数据库环境兼容适配，满足监管检查和等保合规要求。' },
-        ]
-      }
-    },
-    {
-      id: 16,
-      name: '售前项目立项模板',
-      type: 'document',
-      format: 'DOCX',
-      size: '2.7 MB',
-      version: '2.1',
-      updatedAt: '2024-01-14',
-      updatedBy: '售前管理组',
-      category: 'template',
-      downloads: 173,
-      thumbnail: '📄',
-      status: 'approved',
-      wordPreview: {
-        title: '售前项目立项模板',
-        totalPages: 14,
-        sections: [
-          { title: '项目概述', content: '记录客户背景、项目目标、关键时间节点和参与角色，帮助团队快速完成项目立项。' },
-          { title: '机会评估', content: '包含预算判断、竞争格局、风险项与赢单动作，适配解决方案型销售场景。' },
-          { title: '资源申请', content: '用于申请售前、研发、交付、市场等跨部门资源支持。' },
-        ]
-      }
-    },
-    {
-      id: 17,
-      name: '品牌海报主视觉合集',
-      type: 'image',
-      format: 'JPG',
-      size: '16.8 MB',
-      version: '1.9',
-      updatedAt: '2024-01-15',
-      updatedBy: '品牌设计组',
-      category: 'marketing',
-      downloads: 388,
-      thumbnail: '🖼️',
-      status: 'approved',
-      imagePreview: {
-        dimensions: '4961 x 3508',
-        description: '包含新品发布、年度峰会、客户案例和渠道招募等 12 张主视觉海报，可用于官网、会场与社媒传播。',
-        colorMode: 'CMYK / RGB',
-      }
-    },
-    {
-      id: 18,
-      name: '招投标资质文件包',
-      type: 'archive',
-      format: 'ZIP',
-      size: '58.4 MB',
-      version: '4.2',
-      updatedAt: '2024-01-15',
-      updatedBy: '商务支持',
-      category: 'internal',
-      downloads: 92,
-      thumbnail: '📦',
-      status: 'approved',
-      zipPreview: {
-        totalFiles: 42,
-        files: [
-          { name: '营业执照.pdf', size: '1.1 MB', type: 'document' },
-          { name: '高新技术企业证书.pdf', size: '2.0 MB', type: 'document' },
-          { name: 'ISO27001认证.pdf', size: '1.6 MB', type: 'document' },
-          { name: '典型案例清单.docx', size: '0.4 MB', type: 'document' },
-        ]
-      }
-    },
-    {
-      id: 19,
-      name: '行业线索周报数据表',
-      type: 'spreadsheet',
-      format: 'XLSX',
-      size: '1.9 MB',
-      version: '1.1',
-      updatedAt: '2024-01-15',
-      updatedBy: '市场运营',
-      category: 'internal',
-      downloads: 141,
-      thumbnail: '📈',
-      status: 'approved',
-      excelData: {
-        sheetName: '线索周报',
-        headers: ['行业', '新增线索', '有效商机', '转方案', '赢单率'],
-        rows: [
-          ['金融', '36', '18', '9', '22%'],
-          ['制造', '28', '14', '7', '18%'],
-          ['政务', '22', '10', '5', '16%'],
-          ['能源', '16', '8', '4', '19%'],
-        ]
-      }
-    },
-    {
-      id: 20,
-      name: '昂楷科技品牌应用规范',
-      type: 'document',
-      format: 'PDF',
-      size: '14.2 MB',
-      version: '3.5',
-      updatedAt: '2024-01-16',
-      updatedBy: '品牌中心',
-      category: 'brand',
-      downloads: 512,
-      thumbnail: '📕',
-      status: 'approved',
-      pdfPreview: {
-        totalPages: 42,
-        pages: [
-          { num: 1, title: '封面', content: '昂楷科技\n品牌应用规范' },
-          { num: 2, title: '品牌基调', content: '专业 · 稳健 · 技术可信赖' },
-          { num: 3, title: 'Logo 规范', content: '标准比例、保护区与错误示范' },
-          { num: 4, title: '版式系统', content: '封面、海报、展板和演示文稿规范' },
-        ]
-      }
-    },
-  ];
-
-  const categories = [
-    { id: 'all', name: '全部素材', icon: FolderOpen, count: 156 },
-    { id: 'brand', name: '品牌素材', icon: Star, count: 24, children: [
-      { id: 'brand-logo', name: 'Logo标志', count: 8 },
-      { id: 'brand-color', name: '色卡规范', count: 6 },
-      { id: 'brand-font', name: '字体文件', count: 5 },
-      { id: 'brand-vi', name: 'VI规范', count: 5 },
-    ]},
-    { id: 'template', name: '模板文件', icon: FileText, count: 38, children: [
-      { id: 'template-word', name: 'Word模板', count: 12 },
-      { id: 'template-excel', name: 'Excel模板', count: 15 },
-      { id: 'template-contract', name: '合同模板', count: 11 },
-    ]},
-    { id: 'ppt', name: 'PPT模版', icon: Presentation, count: 520, isSpecial: true, children: [
-      { id: 'ppt-complete', name: '整套模板', count: 200, badge: '热门' },
-      { id: 'ppt-single', name: '单页版式', count: 320 },
-    ]},
-    { id: 'guide', name: '规范指南', icon: Bookmark, count: 15, children: [
-      { id: 'guide-brand', name: '品牌手册', count: 5 },
-      { id: 'guide-design', name: '设计规范', count: 6 },
-      { id: 'guide-tech', name: '技术文档', count: 4 },
-    ]},
-    { id: 'marketing', name: '营销素材', icon: Image, count: 67, children: [
-      { id: 'marketing-poster', name: '海报设计', count: 25 },
-      { id: 'marketing-banner', name: '横幅广告', count: 20 },
-      { id: 'marketing-social', name: '社交媒体', count: 22 },
-    ]},
-    { id: 'internal', name: '内部文档', icon: Shield, count: 12 },
-  ];
-
-  const stats = [
-    { label: '总素材数', value: '1,256', change: '+23', icon: FolderOpen },
-    { label: '本月下载', value: '3,847', change: '+12%', icon: Download },
-    { label: '待审核', value: '8', change: '-3', icon: Clock },
-    { label: '活跃用户', value: '89', change: '+5', icon: Users },
-  ];
 
   // 侧边导航
   const Sidebar = () => (
@@ -1430,26 +1433,29 @@ export default function AnkkiDesignV2() {
     }}>
       {/* Logo */}
       <div style={{
-        padding: '24px 20px',
+        padding: '20px',
         borderBottom: `1px solid ${theme.border}`,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{
             width: 40,
             height: 40,
-            background: `linear-gradient(135deg, ${theme.accent}, #e8956d)`,
-            borderRadius: 10,
+            background: `linear-gradient(135deg, ${theme.accent} 0%, #f0a07c 100%)`,
+            borderRadius: 12,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: '#fff',
-            fontWeight: 700,
+            fontWeight: 800,
             fontSize: 18,
             fontFamily: "'DM Sans', sans-serif",
+            boxShadow: `0 4px 12px ${theme.accent}55`,
+            letterSpacing: '-0.5px',
+            flexShrink: 0,
           }}>A</div>
           <div>
-            <div style={{ fontWeight: 600, fontSize: 17, color: theme.text, fontFamily: "'DM Sans', sans-serif", letterSpacing: '-0.3px' }}>Ankki Design</div>
-            <div style={{ fontSize: 11, color: theme.textMuted, marginTop: 2 }}>视觉素材管理平台</div>
+            <div style={{ fontWeight: 700, fontSize: 16, color: theme.text, fontFamily: "'DM Sans', sans-serif", letterSpacing: '-0.4px', lineHeight: 1.2 }}>Ankki Design</div>
+            <div style={{ fontSize: 10, color: theme.textMuted, marginTop: 3, letterSpacing: '0.3px' }}>视觉素材管理平台</div>
           </div>
         </div>
       </div>
@@ -1728,14 +1734,15 @@ export default function AnkkiDesignV2() {
         gap: 12,
         backgroundColor: theme.bgTertiary,
         padding: '10px 16px',
-        borderRadius: 10,
-        width: 400,
+        borderRadius: 12,
+        width: 420,
         border: `1px solid ${theme.border}`,
+        transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
       }}>
-        <Search size={18} style={{ color: theme.textMuted }} />
+        <Search size={17} style={{ color: theme.textMuted, flexShrink: 0 }} />
         <input
           type="text"
-          placeholder="搜索素材名称、标签、上传者..."
+          placeholder="搜索素材、模板、标签..."
           style={{
             border: 'none',
             backgroundColor: 'transparent',
@@ -1745,7 +1752,7 @@ export default function AnkkiDesignV2() {
             color: theme.text,
           }}
         />
-        <span style={{ fontSize: 11, color: theme.textMuted, backgroundColor: theme.bg, padding: '3px 8px', borderRadius: 5 }}>⌘K</span>
+        <kbd style={{ fontSize: 11, color: theme.textMuted, backgroundColor: theme.bg, padding: '3px 8px', borderRadius: 5, border: `1px solid ${theme.border}`, fontFamily: 'inherit', lineHeight: 1.4 }}>⌘K</kbd>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -1841,7 +1848,7 @@ export default function AnkkiDesignV2() {
           }}>
             <Bell size={18} />
           </button>
-          <span style={{
+          <span className="notification-pulse" style={{
             position: 'absolute',
             top: 6,
             right: 6,
@@ -1961,6 +1968,7 @@ export default function AnkkiDesignV2() {
             {pptCompleteTemplates.map(template => (
               <div
                 key={template.id}
+                className="ppt-card"
                 onClick={() => { setPreviewPPT(template); setPreviewPage(0); }}
                 style={{
                   backgroundColor: theme.cardBg,
@@ -1968,7 +1976,6 @@ export default function AnkkiDesignV2() {
                   overflow: 'hidden',
                   border: `1px solid ${theme.border}`,
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease',
                 }}
               >
                 {/* 缩略图 */}
@@ -2000,16 +2007,17 @@ export default function AnkkiDesignV2() {
                     fontSize: 10,
                     fontWeight: 500,
                     color: '#fff',
-                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    backgroundColor: 'rgba(0,0,0,0.45)',
+                    backdropFilter: 'blur(4px)',
                     borderRadius: 4,
-                  }}>点击预览</span>
+                  }}>预览</span>
                 </div>
 
                 {/* 信息 */}
                 <div style={{ padding: 16 }}>
                   <h4 style={{
                     fontSize: 14,
-                    fontWeight: 500,
+                    fontWeight: 600,
                     color: theme.text,
                     marginBottom: 6,
                     lineHeight: 1.4,
@@ -2095,6 +2103,7 @@ export default function AnkkiDesignV2() {
             {pptSingleTemplates.map(template => (
               <div
                 key={template.id}
+                className="ppt-card"
                 onClick={() => { setPreviewPPT(template); setPreviewPage(0); }}
                 style={{
                   backgroundColor: theme.cardBg,
@@ -2102,7 +2111,6 @@ export default function AnkkiDesignV2() {
                   overflow: 'hidden',
                   border: `1px solid ${theme.border}`,
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease',
                 }}
               >
                 {/* 缩略图 */}
@@ -2189,22 +2197,24 @@ export default function AnkkiDesignV2() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, marginBottom: 32 }}>
         {stats.map((stat, i) => (
-          <div key={i} style={{
+          <div key={i} className="card-hover" style={{
             backgroundColor: theme.cardBg,
-            borderRadius: 14,
-            padding: 24,
+            borderRadius: 16,
+            padding: '22px 24px',
             border: `1px solid ${theme.border}`,
+            cursor: 'default',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
               <div style={{
                 width: 44,
                 height: 44,
                 borderRadius: 12,
-                backgroundColor: theme.accentLight,
+                background: `linear-gradient(135deg, ${theme.accentLight}, ${theme.accentLight})`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: theme.accent,
+                boxShadow: `0 2px 8px ${theme.accent}22`,
               }}>
                 <stat.icon size={22} />
               </div>
@@ -2214,10 +2224,10 @@ export default function AnkkiDesignV2() {
                 backgroundColor: stat.change.includes('+') ? (darkMode ? 'rgba(74, 222, 128, 0.15)' : 'rgba(74, 222, 128, 0.1)') : (darkMode ? 'rgba(251, 191, 36, 0.15)' : 'rgba(251, 191, 36, 0.1)'),
                 padding: '4px 10px',
                 borderRadius: 20,
-                fontWeight: 500,
+                fontWeight: 600,
               }}>{stat.change}</span>
             </div>
-            <div style={{ fontSize: 28, fontWeight: 600, color: theme.text, marginBottom: 4, fontFamily: "'DM Sans', sans-serif" }}>{stat.value}</div>
+            <div style={{ fontSize: 30, fontWeight: 700, color: theme.text, marginBottom: 4, fontFamily: "'DM Sans', sans-serif", letterSpacing: '-0.5px' }}>{stat.value}</div>
             <div style={{ fontSize: 13, color: theme.textSecondary }}>{stat.label}</div>
           </div>
         ))}
@@ -2225,35 +2235,55 @@ export default function AnkkiDesignV2() {
 
       {/* PPT模版推荐卡片 */}
       <div style={{
-        backgroundColor: `linear-gradient(135deg, ${theme.accent}, #e8956d)`,
-        background: `linear-gradient(135deg, ${theme.accent}, #e8956d)`,
-        borderRadius: 16,
-        padding: 28,
+        background: `linear-gradient(135deg, ${theme.accent} 0%, #e8956d 55%, #f5c4a8 110%)`,
+        borderRadius: 18,
+        padding: '28px 36px',
         marginBottom: 24,
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        boxShadow: `0 8px 32px ${theme.accent}44`,
       }}>
-        <div>
-          <h3 style={{ fontSize: 20, fontWeight: 600, color: '#fff', marginBottom: 8 }}>🎉 PPT模版库全新上线</h3>
-          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.85)', marginBottom: 16 }}>520+ 精选模板，涵盖职场场景、创意主题、数据图表等多个分类</p>
-          <button
-            onClick={() => { setSelectedCategory('ppt'); setCurrentView('ppt-templates'); }}
-            style={{
-              padding: '10px 24px',
-              backgroundColor: '#fff',
-              color: theme.accent,
-              border: 'none',
-              borderRadius: 8,
-              cursor: 'pointer',
-              fontSize: 14,
-              fontWeight: 500,
-            }}
-          >
-            立即查看
-          </button>
+        {/* 装饰圆圈 */}
+        <div style={{
+          position: 'absolute', right: 120, top: -40,
+          width: 180, height: 180, borderRadius: '50%',
+          backgroundColor: 'rgba(255,255,255,0.08)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute', right: 60, bottom: -60,
+          width: 240, height: 240, borderRadius: '50%',
+          backgroundColor: 'rgba(255,255,255,0.06)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '1px', color: 'rgba(255,255,255,0.7)', marginBottom: 10, textTransform: 'uppercase' }}>模板资源库</div>
+          <h3 style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>PPT 模版库全新上线 🎉</h3>
+          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.88)', marginBottom: 20, lineHeight: 1.6, maxWidth: 440 }}>520+ 精选原创模板，涵盖职场汇报、创意主题、数据图表等多个分类，一键下载即用</p>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <button
+              onClick={() => { setSelectedCategory('ppt'); setCurrentView('ppt-templates'); }}
+              style={{
+                padding: '10px 24px',
+                backgroundColor: '#fff',
+                color: theme.accent,
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+                fontSize: 14,
+                fontWeight: 600,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              }}
+            >
+              立即查看
+            </button>
+            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>· 免费下载</span>
+          </div>
         </div>
-        <div style={{ fontSize: 64 }}>📊</div>
+        <div style={{ fontSize: 72, position: 'relative', zIndex: 1, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.2))' }}>📊</div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
@@ -2534,6 +2564,7 @@ export default function AnkkiDesignV2() {
         {filteredAssets.map(asset => (
           <div
             key={asset.id}
+            className="card-hover"
             onClick={() => setPreviewAsset(asset)}
             style={{
               backgroundColor: theme.cardBg,
@@ -2984,12 +3015,6 @@ export default function AnkkiDesignV2() {
           </div>
         </div>
 
-        <style>{`
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
       </div>
     );
   };
@@ -4499,7 +4524,7 @@ export default function AnkkiDesignV2() {
                   gap: 8,
                 }}
               >
-                <Play size={16} />
+                <Play size={16} className={videoGenerating ? 'ai-generating' : ''} />
                 {videoGenerating ? '生成中...' : '立即生成'}
               </button>
               <button
@@ -4585,7 +4610,7 @@ export default function AnkkiDesignV2() {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                       <div style={{ fontSize: 14, fontWeight: 600, color: selectedVideoProjectId === project.id ? theme.accent : theme.text }}>{project.title}</div>
-                      <span style={{ fontSize: 11, padding: '4px 8px', borderRadius: 999, backgroundColor: statusMeta.bg, color: statusMeta.color }}>
+                      <span className={statusMeta.label === '生成中' ? 'ai-generating' : ''} style={{ fontSize: 11, padding: '4px 8px', borderRadius: 999, backgroundColor: statusMeta.bg, color: statusMeta.color, fontWeight: 500 }}>
                         {statusMeta.label}
                       </span>
                     </div>
@@ -5038,7 +5063,7 @@ export default function AnkkiDesignV2() {
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                       <div style={{ fontSize: 14, fontWeight: 600, color: selectedPptProjectId === project.id ? theme.accent : theme.text }}>{project.title}</div>
-                      <span style={{ fontSize: 11, padding: '4px 8px', borderRadius: 999, backgroundColor: statusMeta.bg, color: statusMeta.color }}>
+                      <span className={statusMeta.label === '生成中' ? 'ai-generating' : ''} style={{ fontSize: 11, padding: '4px 8px', borderRadius: 999, backgroundColor: statusMeta.bg, color: statusMeta.color, fontWeight: 500 }}>
                         {statusMeta.label}
                       </span>
                     </div>
@@ -5685,14 +5710,143 @@ export default function AnkkiDesignV2() {
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: ${theme.bg}; }
         ::-webkit-scrollbar-thumb { background: ${theme.border}; border-radius: 3px; }
-        button:hover { opacity: 0.9; }
+        ::-webkit-scrollbar-thumb:hover { background: ${theme.textMuted}; }
+
+        /* 主题切换平滑过渡 */
+        body, div, aside, header, main, section, article, nav, button, input, textarea, select, span, p, h1, h2, h3, h4, a {
+          transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease;
+        }
+
+        /* 按钮全局过渡（不影响 transform 类） */
+        button { transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease; }
+        button:hover { opacity: 0.88; }
+        button:active { transform: scale(0.97); }
+
+        /* 卡片悬浮效果 */
+        .card-hover {
+          transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+        }
+        .card-hover:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 12px 32px ${darkMode ? 'rgba(0,0,0,0.45)' : 'rgba(0,0,0,0.12)'} !important;
+          border-color: ${theme.accent}44 !important;
+        }
+
+        /* PPT 模板卡片 */
+        .ppt-card {
+          transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+        }
+        .ppt-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px ${darkMode ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.1)'} !important;
+          border-color: ${theme.accent}66 !important;
+        }
+        .ppt-card:hover .ppt-preview-overlay {
+          opacity: 1 !important;
+        }
+
+        /* 侧边导航项悬浮 */
+        .nav-item:hover {
+          background-color: ${theme.bgTertiary} !important;
+          color: ${theme.text} !important;
+        }
+
+        /* 素材卡片覆盖层 */
+        .asset-card {
+          transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+        }
+        .asset-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px ${darkMode ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.1)'} !important;
+        }
+        .asset-card:hover .asset-overlay {
+          opacity: 1 !important;
+        }
+
+        /* 列表行悬浮 */
+        .table-row {
+          transition: background-color 0.15s ease;
+        }
+        .table-row:hover {
+          background-color: ${theme.bgTertiary} !important;
+        }
+
+        /* 页面淡入动画 */
+        @keyframes pageIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .page-view {
+          animation: pageIn 0.25s ease;
+        }
+
+        /* 通知徽标脉冲 */
+        @keyframes pulse {
+          0%, 100% { box-shadow: 0 0 0 0 ${theme.accent}88; }
+          50% { box-shadow: 0 0 0 4px ${theme.accent}22; }
+        }
+        .notification-pulse {
+          animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* AI 状态闪烁 */
+        @keyframes shimmer {
+          0% { opacity: 0.6; }
+          50% { opacity: 1; }
+          100% { opacity: 0.6; }
+        }
+        .ai-generating {
+          animation: shimmer 1.5s ease-in-out infinite;
+        }
+
+        /* 标签悬浮 */
+        .tag-btn {
+          transition: all 0.15s ease !important;
+        }
+        .tag-btn:hover {
+          border-color: ${theme.accent} !important;
+          color: ${theme.accent} !important;
+          opacity: 1 !important;
+        }
+
+        /* 链接/导航点击效果 */
+        .clickable { cursor: pointer; }
+        .clickable:hover { opacity: 0.82; }
+
+        /* 输入框聚焦 */
+        input:focus, textarea:focus, select:focus {
+          outline: none;
+          border-color: ${theme.accent} !important;
+          box-shadow: 0 0 0 3px ${theme.accent}22 !important;
+          transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        /* 模态框动画 */
+        @keyframes modalIn {
+          from { opacity: 0; transform: scale(0.96); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .modal-content {
+          animation: modalIn 0.2s ease;
+        }
+
+        /* 加载旋转 */
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+
+        /* 滚动条 Firefox */
+        * { scrollbar-width: thin; scrollbar-color: ${theme.border} transparent; }
       `}</style>
       
       <Sidebar />
       
       <main style={{ marginLeft: 260, flex: 1, minHeight: '100vh' }}>
         <TopBar />
-        {renderView()}
+        <div key={currentView} className="page-view">
+          {renderView()}
+        </div>
       </main>
 
       <PreviewModal />
