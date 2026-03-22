@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { BookOpen, Eye, Link2, Upload, X, ChevronLeft, ChevronRight, Copy, Check, ExternalLink, Search } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { initialBrochures } from '../../data/mockData';
 
 const CATEGORIES = ['全部', '产品手册', '企业画册', '解决方案', '白皮书', '案例集'];
 
@@ -200,13 +199,13 @@ function ShareModal({ brochure, onClose }) {
 
 // ─── Main View ───────────────────────────────────────────────────────────────
 export default function Brochures() {
-  const { theme, darkMode, isAdmin, setUploadOpen } = useApp();
+  const { theme, darkMode, isAdmin, setUploadOpen, brochures } = useApp();
   const [category, setCategory] = useState('全部');
   const [search, setSearch] = useState('');
   const [viewingBrochure, setViewingBrochure] = useState(null);
   const [sharingBrochure, setSharingBrochure] = useState(null);
 
-  const filtered = initialBrochures.filter(b => {
+  const filtered = brochures.filter(b => {
     const matchCat = category === '全部' || b.category === category;
     const matchSearch = !search || b.title.includes(search) || b.subtitle.toLowerCase().includes(search.toLowerCase()) || b.category.includes(search);
     return matchCat && matchSearch;

@@ -3,7 +3,7 @@ import { Upload, X, Check } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function UploadModal() {
-  const { theme, darkMode, currentUser, isSuperAdmin, isAdmin, setUploadOpen, setAuditItems } = useApp();
+  const { theme, darkMode, currentUser, isSuperAdmin, isAdmin, setUploadOpen, setAuditItems, setBrochures } = useApp();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [assetName, setAssetName] = useState('');
   const [mainCategory, setMainCategory] = useState('');
@@ -78,8 +78,29 @@ export default function UploadModal() {
       setTimeout(() => {
         setUploading(false);
         setUploadSuccess(true);
-        // 普通用户上传 → 加入审核队列
-        if (!isAdmin) {
+        if (isAdmin && mainCategory === 'brochure') {
+          // 管理员上传彩页 → 直接加入彩页书架
+          const subLabels = { 'company-intro': '公司介绍', 'product-single': '产品单页', 'solution': '解决方案', 'case-study': '案例集' };
+          const gradients = [['#1478F0','#0a4fa8'],['#7c3aed','#4c1d95'],['#0f766e','#134e4a'],['#be123c','#881337'],['#b45309','#78350f'],['#0369a1','#0c4a6e']];
+          const g = gradients[Math.floor(Math.random() * gradients.length)];
+          const newBrochure = {
+            id: `b-${Date.now()}`,
+            title: assetName,
+            subtitle: assetName,
+            category: subLabels[subCategory] || subCategory,
+            gradient: g,
+            pages: 0,
+            uploadedBy: currentUser.name,
+            uploadedAt: new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }),
+            size: selectedFiles[0]?.size || '-',
+            shareCode: `brochure-${Date.now()}`,
+            views: 0,
+            description: description || assetName,
+            previewPages: [{ label: '封面', bg: g[0], title: assetName, sub: subLabels[subCategory] || '' }],
+          };
+          setBrochures(prev => [newBrochure, ...prev]);
+        } else if (!isAdmin) {
+          // 普通用户上传 → 加入审核队列
           const newItem = {
             id: `upload-${Date.now()}`,
             name: assetName,
