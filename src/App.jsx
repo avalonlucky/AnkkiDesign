@@ -810,39 +810,39 @@ export default function AnkkiDesignV2() {
   const [pptExporting, setPptExporting] = useState(false);
   const [pptExportError, setPptExportError] = useState('');
   
-  // 主题配置 - Claude 风格
+  // 主题配置 - 华尔街见闻风格（专业金融蓝）
   const theme = darkMode ? {
-    bg: '#1a1a1a',
-    bgSecondary: '#252525',
-    bgTertiary: '#2d2d2d',
-    text: '#f5f5f5',
-    textSecondary: '#a0a0a0',
-    textMuted: '#666666',
-    border: '#333333',
-    accent: '#d97757',
-    accentHover: '#c4684a',
-    accentLight: 'rgba(217, 119, 87, 0.15)',
-    success: '#4ade80',
+    bg: '#111827',
+    bgSecondary: '#1f2937',
+    bgTertiary: '#374151',
+    text: '#f9fafb',
+    textSecondary: '#9ca3af',
+    textMuted: '#6b7280',
+    border: '#374151',
+    accent: '#3b82f6',
+    accentHover: '#2563eb',
+    accentLight: 'rgba(59, 130, 246, 0.15)',
+    success: '#34d399',
     warning: '#fbbf24',
-    cardBg: '#222222',
-    cardHover: '#2a2a2a',
-    tagBg: '#333333',
+    cardBg: '#1f2937',
+    cardHover: '#263244',
+    tagBg: '#374151',
   } : {
-    bg: '#faf9f7',
+    bg: '#f5f6f7',
     bgSecondary: '#ffffff',
-    bgTertiary: '#f5f4f2',
-    text: '#1a1a1a',
-    textSecondary: '#666666',
-    textMuted: '#999999',
-    border: '#e8e6e3',
-    accent: '#d97757',
-    accentHover: '#c4684a',
-    accentLight: 'rgba(217, 119, 87, 0.1)',
-    success: '#22c55e',
-    warning: '#f59e0b',
+    bgTertiary: '#f0f2f5',
+    text: '#1f2937',
+    textSecondary: '#4b5563',
+    textMuted: '#9ca3af',
+    border: '#e5e7eb',
+    accent: '#1478F0',
+    accentHover: '#1260cc',
+    accentLight: 'rgba(20, 120, 240, 0.08)',
+    success: '#1F995C',
+    warning: '#E58612',
     cardBg: '#ffffff',
-    cardHover: '#faf9f7',
-    tagBg: '#f5f4f2',
+    cardHover: '#f8f9fa',
+    tagBg: '#f0f2f5',
   };
 
   const getGenerationStatusMeta = (status) => {
@@ -934,7 +934,7 @@ export default function AnkkiDesignV2() {
             fontWeight: 700,
             lineHeight: 1.25,
             marginBottom: 8,
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
             whiteSpace: 'pre-line',
           }}>
             {firstPage?.content || template.name}
@@ -979,7 +979,7 @@ export default function AnkkiDesignV2() {
               fontWeight: 700,
               lineHeight: 1.25,
               marginBottom: 8,
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
               whiteSpace: 'pre-line',
             }}>
               {preview.title}
@@ -1025,7 +1025,7 @@ export default function AnkkiDesignV2() {
           </div>
           <div style={{
             width: 46,
-            borderRadius: 10,
+            borderRadius: 5,
             backgroundColor: 'rgba(255,255,255,0.16)',
             border: '1px solid rgba(255,255,255,0.25)',
             display: 'flex',
@@ -1142,7 +1142,7 @@ export default function AnkkiDesignV2() {
               lineHeight: 1.3,
               whiteSpace: 'pre-line',
               marginBottom: compact ? 4 : 10,
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
             }}>
               {firstPage.content}
             </div>
@@ -1213,7 +1213,7 @@ export default function AnkkiDesignV2() {
             fontWeight: 700,
             lineHeight: 1.28,
             whiteSpace: 'pre-line',
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
           }}>
             {firstSlide.content}
           </div>
@@ -1407,7 +1407,7 @@ export default function AnkkiDesignV2() {
           fontSize: compact ? 8 : 16,
           fontWeight: 700,
           lineHeight: 1.35,
-          fontFamily: "'DM Sans', sans-serif",
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
         }}>
           {asset.name}
         </div>
@@ -1440,21 +1440,23 @@ export default function AnkkiDesignV2() {
           <div style={{
             width: 40,
             height: 40,
-            background: `linear-gradient(135deg, ${theme.accent} 0%, #f0a07c 100%)`,
-            borderRadius: 12,
+            background: darkMode
+              ? `linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)`
+              : `linear-gradient(135deg, #1260cc 0%, #1478F0 100%)`,
+            borderRadius: 6,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             color: '#fff',
             fontWeight: 800,
             fontSize: 18,
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
             boxShadow: `0 4px 12px ${theme.accent}55`,
             letterSpacing: '-0.5px',
             flexShrink: 0,
           }}>A</div>
           <div>
-            <div style={{ fontWeight: 700, fontSize: 16, color: theme.text, fontFamily: "'DM Sans', sans-serif", letterSpacing: '-0.4px', lineHeight: 1.2 }}>Ankki Design</div>
+            <div style={{ fontWeight: 700, fontSize: 16, color: theme.text, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif", letterSpacing: '-0.4px', lineHeight: 1.2 }}>Ankki Design</div>
             <div style={{ fontSize: 10, color: theme.textMuted, marginTop: 3, letterSpacing: '0.3px' }}>视觉素材管理平台</div>
           </div>
         </div>
@@ -1562,7 +1564,7 @@ export default function AnkkiDesignV2() {
                       }}>NEW</span>
                     )}
                   </span>
-                  <span style={{ fontSize: 11, color: theme.textMuted, backgroundColor: theme.tagBg, padding: '2px 8px', borderRadius: 10 }}>{cat.count}</span>
+                  <span style={{ fontSize: 11, color: theme.textMuted, backgroundColor: theme.tagBg, padding: '2px 8px', borderRadius: 5 }}>{cat.count}</span>
                 </button>
                 
                 {/* 子分类 */}
@@ -1685,7 +1687,7 @@ export default function AnkkiDesignV2() {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '10px 12px',
-          borderRadius: 10,
+          borderRadius: 5,
           backgroundColor: theme.bgTertiary,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -1717,13 +1719,13 @@ export default function AnkkiDesignV2() {
   // 顶部导航
   const TopBar = () => (
     <header style={{
-      height: 64,
+      height: 56,
       backgroundColor: theme.bgSecondary,
       borderBottom: `1px solid ${theme.border}`,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '0 28px',
+      padding: '0 24px',
       position: 'sticky',
       top: 0,
       zIndex: 100,
@@ -1734,7 +1736,7 @@ export default function AnkkiDesignV2() {
         gap: 12,
         backgroundColor: theme.bgTertiary,
         padding: '10px 16px',
-        borderRadius: 12,
+        borderRadius: 6,
         width: 420,
         border: `1px solid ${theme.border}`,
         transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
@@ -1825,7 +1827,7 @@ export default function AnkkiDesignV2() {
             justifyContent: 'center',
             backgroundColor: theme.bgTertiary,
             border: `1px solid ${theme.border}`,
-            borderRadius: 10,
+            borderRadius: 5,
             cursor: 'pointer',
             color: theme.textSecondary,
           }}
@@ -1842,7 +1844,7 @@ export default function AnkkiDesignV2() {
             justifyContent: 'center',
             backgroundColor: theme.bgTertiary,
             border: `1px solid ${theme.border}`,
-            borderRadius: 10,
+            borderRadius: 5,
             cursor: 'pointer',
             color: theme.textSecondary,
           }}>
@@ -1867,7 +1869,7 @@ export default function AnkkiDesignV2() {
     <div style={{ padding: 28 }}>
       {/* 页面标题 */}
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 24, fontWeight: 600, color: theme.text, marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
+        <h2 style={{ fontSize: 24, fontWeight: 600, color: theme.text, marginBottom: 8, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>
           PPT模版库
         </h2>
         <p style={{ fontSize: 14, color: theme.textSecondary }}>精选高质量PPT模板，助力高效办公</p>
@@ -1953,7 +1955,7 @@ export default function AnkkiDesignV2() {
                   color: pptCompleteSubCategory === sub.id ? theme.accent : theme.textSecondary,
                   backgroundColor: pptCompleteSubCategory === sub.id ? theme.accentLight : theme.tagBg,
                   border: pptCompleteSubCategory === sub.id ? `1px solid ${theme.accent}` : `1px solid transparent`,
-                  borderRadius: 20,
+                  borderRadius: 5,
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}
@@ -1972,7 +1974,7 @@ export default function AnkkiDesignV2() {
                 onClick={() => { setPreviewPPT(template); setPreviewPage(0); }}
                 style={{
                   backgroundColor: theme.cardBg,
-                  borderRadius: 12,
+                  borderRadius: 6,
                   overflow: 'hidden',
                   border: `1px solid ${theme.border}`,
                   cursor: 'pointer',
@@ -2088,7 +2090,7 @@ export default function AnkkiDesignV2() {
                   color: pptSingleSubCategory === sub.id ? theme.accent : theme.textSecondary,
                   backgroundColor: pptSingleSubCategory === sub.id ? theme.accentLight : theme.tagBg,
                   border: pptSingleSubCategory === sub.id ? `1px solid ${theme.accent}` : `1px solid transparent`,
-                  borderRadius: 20,
+                  borderRadius: 5,
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
                 }}
@@ -2107,7 +2109,7 @@ export default function AnkkiDesignV2() {
                 onClick={() => { setPreviewPPT(template); setPreviewPage(0); }}
                 style={{
                   backgroundColor: theme.cardBg,
-                  borderRadius: 10,
+                  borderRadius: 5,
                   overflow: 'hidden',
                   border: `1px solid ${theme.border}`,
                   cursor: 'pointer',
@@ -2168,7 +2170,7 @@ export default function AnkkiDesignV2() {
   const DashboardView = () => (
     <div style={{ padding: 28 }}>
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 600, color: theme.text, marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
+        <h1 style={{ fontSize: 26, fontWeight: 600, color: theme.text, marginBottom: 8, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>
           早上好，{currentUser.name} 👋
         </h1>
         <p style={{ fontSize: 15, color: theme.textSecondary }}>
@@ -2186,7 +2188,7 @@ export default function AnkkiDesignV2() {
         gap: 8,
         padding: '8px 16px',
         backgroundColor: isSuperAdmin ? 'rgba(239, 68, 68, 0.1)' : isAdmin ? 'rgba(139, 92, 246, 0.1)' : theme.bgTertiary,
-        borderRadius: 20,
+        borderRadius: 5,
         marginBottom: 24,
       }}>
         <Shield size={16} color={isSuperAdmin ? '#ef4444' : isAdmin ? '#8b5cf6' : theme.textSecondary} />
@@ -2199,7 +2201,7 @@ export default function AnkkiDesignV2() {
         {stats.map((stat, i) => (
           <div key={i} className="card-hover" style={{
             backgroundColor: theme.cardBg,
-            borderRadius: 16,
+            borderRadius: 8,
             padding: '22px 24px',
             border: `1px solid ${theme.border}`,
             cursor: 'default',
@@ -2208,7 +2210,7 @@ export default function AnkkiDesignV2() {
               <div style={{
                 width: 44,
                 height: 44,
-                borderRadius: 12,
+                borderRadius: 6,
                 background: `linear-gradient(135deg, ${theme.accentLight}, ${theme.accentLight})`,
                 display: 'flex',
                 alignItems: 'center',
@@ -2223,11 +2225,11 @@ export default function AnkkiDesignV2() {
                 color: stat.change.includes('+') ? theme.success : theme.warning,
                 backgroundColor: stat.change.includes('+') ? (darkMode ? 'rgba(74, 222, 128, 0.15)' : 'rgba(74, 222, 128, 0.1)') : (darkMode ? 'rgba(251, 191, 36, 0.15)' : 'rgba(251, 191, 36, 0.1)'),
                 padding: '4px 10px',
-                borderRadius: 20,
+                borderRadius: 5,
                 fontWeight: 600,
               }}>{stat.change}</span>
             </div>
-            <div style={{ fontSize: 30, fontWeight: 700, color: theme.text, marginBottom: 4, fontFamily: "'DM Sans', sans-serif", letterSpacing: '-0.5px' }}>{stat.value}</div>
+            <div style={{ fontSize: 30, fontWeight: 700, color: theme.text, marginBottom: 4, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif", letterSpacing: '-0.5px' }}>{stat.value}</div>
             <div style={{ fontSize: 13, color: theme.textSecondary }}>{stat.label}</div>
           </div>
         ))}
@@ -2235,8 +2237,10 @@ export default function AnkkiDesignV2() {
 
       {/* PPT模版推荐卡片 */}
       <div style={{
-        background: `linear-gradient(135deg, ${theme.accent} 0%, #e8956d 55%, #f5c4a8 110%)`,
-        borderRadius: 18,
+        background: darkMode
+          ? `linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%)`
+          : `linear-gradient(135deg, #1260cc 0%, #1478F0 50%, #3b9cf7 100%)`,
+        borderRadius: 8,
         padding: '28px 36px',
         marginBottom: 24,
         display: 'flex',
@@ -2244,7 +2248,7 @@ export default function AnkkiDesignV2() {
         alignItems: 'center',
         position: 'relative',
         overflow: 'hidden',
-        boxShadow: `0 8px 32px ${theme.accent}44`,
+        boxShadow: `0 4px 20px rgba(20, 120, 240, 0.3)`,
       }}>
         {/* 装饰圆圈 */}
         <div style={{
@@ -2261,7 +2265,7 @@ export default function AnkkiDesignV2() {
         }} />
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '1px', color: 'rgba(255,255,255,0.7)', marginBottom: 10, textTransform: 'uppercase' }}>模板资源库</div>
-          <h3 style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>PPT 模版库全新上线 🎉</h3>
+          <h3 style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginBottom: 8, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>PPT 模版库全新上线 🎉</h3>
           <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.88)', marginBottom: 20, lineHeight: 1.6, maxWidth: 440 }}>520+ 精选原创模板，涵盖职场汇报、创意主题、数据图表等多个分类，一键下载即用</p>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <button
@@ -2289,7 +2293,7 @@ export default function AnkkiDesignV2() {
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
         <div style={{
           backgroundColor: theme.cardBg,
-          borderRadius: 14,
+          borderRadius: 6,
           border: `1px solid ${theme.border}`,
           overflow: 'hidden',
         }}>
@@ -2332,7 +2336,7 @@ export default function AnkkiDesignV2() {
                   <div style={{
                     width: 44,
                     height: 44,
-                    borderRadius: 10,
+                    borderRadius: 5,
                     overflow: 'hidden',
                     border: `1px solid ${theme.border}`,
                   }}>{renderAssetPreview(asset, { compact: true, statusBadge: false })}</div>
@@ -2358,7 +2362,7 @@ export default function AnkkiDesignV2() {
 
         <div style={{
           backgroundColor: theme.cardBg,
-          borderRadius: 14,
+          borderRadius: 6,
           border: `1px solid ${theme.border}`,
           overflow: 'hidden',
         }}>
@@ -2457,7 +2461,7 @@ export default function AnkkiDesignV2() {
         marginBottom: 24,
       }}>
         <div>
-          <h2 style={{ fontSize: 22, fontWeight: 600, color: theme.text, marginBottom: 4, fontFamily: "'DM Sans', sans-serif" }}>
+          <h2 style={{ fontSize: 22, fontWeight: 600, color: theme.text, marginBottom: 4, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>
             {currentSubCategory?.name || currentCategory?.name || '全部素材'}
           </h2>
           <p style={{ fontSize: 14, color: theme.textSecondary }}>
@@ -2532,7 +2536,7 @@ export default function AnkkiDesignV2() {
           marginBottom: 24,
           padding: 16,
           backgroundColor: theme.bgTertiary,
-          borderRadius: 10,
+          borderRadius: 5,
         }}>
           <span style={{ fontSize: 13, color: theme.textMuted, marginRight: 8 }}>子分类：</span>
           {currentCategory.children.map(sub => (
@@ -2568,7 +2572,7 @@ export default function AnkkiDesignV2() {
             onClick={() => setPreviewAsset(asset)}
             style={{
               backgroundColor: theme.cardBg,
-              borderRadius: 14,
+              borderRadius: 6,
               border: `1px solid ${theme.border}`,
               overflow: 'hidden',
               cursor: 'pointer',
@@ -2777,7 +2781,7 @@ export default function AnkkiDesignV2() {
           gap: 12,
           padding: 16,
           backgroundColor: theme.bgTertiary,
-          borderRadius: 10,
+          borderRadius: 5,
           marginBottom: 24,
         }}>
           <div style={{
@@ -2798,7 +2802,7 @@ export default function AnkkiDesignV2() {
           onDragOver={handleDragOver}
           style={{
             border: `2px dashed ${selectedFiles.length > 0 ? theme.accent : theme.border}`,
-            borderRadius: 16,
+            borderRadius: 8,
             padding: selectedFiles.length > 0 ? 24 : 48,
             textAlign: 'center',
             marginBottom: 24,
@@ -2818,7 +2822,7 @@ export default function AnkkiDesignV2() {
           {selectedFiles.length === 0 ? (
             <>
               <div style={{
-                width: 72, height: 72, borderRadius: 16, backgroundColor: theme.accentLight,
+                width: 72, height: 72, borderRadius: 8, backgroundColor: theme.accentLight,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 margin: '0 auto 20px', color: theme.accent,
               }}>
@@ -2840,7 +2844,7 @@ export default function AnkkiDesignV2() {
                 {selectedFiles.map((file, index) => (
                   <div key={index} style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '12px 16px', backgroundColor: theme.cardBg, borderRadius: 10,
+                    padding: '12px 16px', backgroundColor: theme.cardBg, borderRadius: 5,
                     marginBottom: 8, border: `1px solid ${theme.border}`,
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -2876,7 +2880,7 @@ export default function AnkkiDesignV2() {
 
         {/* 素材信息表单 */}
         <div style={{
-          backgroundColor: theme.cardBg, borderRadius: 14,
+          backgroundColor: theme.cardBg, borderRadius: 6,
           border: `1px solid ${theme.border}`, padding: 28,
         }}>
           <h3 style={{ fontSize: 16, fontWeight: 600, color: theme.text, marginBottom: 24 }}>素材信息</h3>
@@ -2970,7 +2974,7 @@ export default function AnkkiDesignV2() {
           {/* 提交状态 */}
           {uploadSuccess && (
             <div style={{
-              padding: 16, backgroundColor: 'rgba(16, 185, 129, 0.1)', borderRadius: 10,
+              padding: 16, backgroundColor: 'rgba(16, 185, 129, 0.1)', borderRadius: 5,
               display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20,
             }}>
               <div style={{
@@ -3072,7 +3076,7 @@ export default function AnkkiDesignV2() {
         <div style={{
           width: 480,
           backgroundColor: theme.cardBg,
-          borderRadius: 16,
+          borderRadius: 8,
           overflow: 'hidden',
         }} onClick={e => e.stopPropagation()}>
           <div style={{
@@ -3180,7 +3184,7 @@ export default function AnkkiDesignV2() {
         <div style={{
           width: 400,
           backgroundColor: theme.cardBg,
-          borderRadius: 16,
+          borderRadius: 8,
           padding: 24,
         }} onClick={e => e.stopPropagation()}>
           <div style={{
@@ -3243,7 +3247,7 @@ export default function AnkkiDesignV2() {
             <div style={{
               padding: 20,
               backgroundColor: 'rgba(239, 68, 68, 0.08)',
-              borderRadius: 12,
+              borderRadius: 6,
               border: '1px solid rgba(239, 68, 68, 0.2)',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -3257,7 +3261,7 @@ export default function AnkkiDesignV2() {
             <div style={{
               padding: 20,
               backgroundColor: 'rgba(139, 92, 246, 0.08)',
-              borderRadius: 12,
+              borderRadius: 6,
               border: '1px solid rgba(139, 92, 246, 0.2)',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -3271,7 +3275,7 @@ export default function AnkkiDesignV2() {
             <div style={{
               padding: 20,
               backgroundColor: theme.bgTertiary,
-              borderRadius: 12,
+              borderRadius: 6,
               border: `1px solid ${theme.border}`,
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -3294,9 +3298,9 @@ export default function AnkkiDesignV2() {
             { label: '普通用户', value: users.filter(u => u.role === 'user').length, color: theme.textSecondary },
           ].map((stat, i) => (
             <div key={i} style={{
-              padding: 20, backgroundColor: theme.cardBg, borderRadius: 12, border: `1px solid ${theme.border}`,
+              padding: 20, backgroundColor: theme.cardBg, borderRadius: 6, border: `1px solid ${theme.border}`,
             }}>
-              <div style={{ fontSize: 28, fontWeight: 600, color: stat.color, marginBottom: 4, fontFamily: "'DM Sans', sans-serif" }}>{stat.value}</div>
+              <div style={{ fontSize: 28, fontWeight: 600, color: stat.color, marginBottom: 4, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>{stat.value}</div>
               <div style={{ fontSize: 13, color: theme.textSecondary }}>{stat.label}</div>
             </div>
           ))}
@@ -3331,7 +3335,7 @@ export default function AnkkiDesignV2() {
         {/* 用户列表 */}
         <div style={{
           backgroundColor: theme.cardBg,
-          borderRadius: 14,
+          borderRadius: 6,
           border: `1px solid ${theme.border}`,
           overflow: 'hidden',
         }}>
@@ -3444,11 +3448,11 @@ export default function AnkkiDesignV2() {
         ].map((stat, i) => (
           <div key={i} style={{
             backgroundColor: theme.cardBg,
-            borderRadius: 12,
+            borderRadius: 6,
             padding: 20,
             border: `1px solid ${theme.border}`,
           }}>
-            <div style={{ fontSize: 28, fontWeight: 600, color: stat.color, marginBottom: 4, fontFamily: "'DM Sans', sans-serif" }}>{stat.value}</div>
+            <div style={{ fontSize: 28, fontWeight: 600, color: stat.color, marginBottom: 4, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>{stat.value}</div>
             <div style={{ fontSize: 13, color: theme.textSecondary }}>{stat.label}</div>
           </div>
         ))}
@@ -3456,7 +3460,7 @@ export default function AnkkiDesignV2() {
 
       <div style={{
         backgroundColor: theme.cardBg,
-        borderRadius: 14,
+        borderRadius: 6,
         border: `1px solid ${theme.border}`,
       }}>
         <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}` }}>
@@ -3474,7 +3478,7 @@ export default function AnkkiDesignV2() {
               <div style={{
                 width: 56,
                 height: 56,
-                borderRadius: 10,
+                borderRadius: 5,
                 overflow: 'hidden',
                 border: `1px solid ${theme.border}`,
               }}>{renderAssetPreview(asset, { compact: true, statusBadge: false })}</div>
@@ -3540,14 +3544,14 @@ export default function AnkkiDesignV2() {
         ].map((stat, i) => (
           <div key={i} style={{
             backgroundColor: theme.cardBg,
-            borderRadius: 14,
+            borderRadius: 6,
             padding: 24,
             border: `1px solid ${theme.border}`,
           }}>
             <div style={{
               width: 44,
               height: 44,
-              borderRadius: 12,
+              borderRadius: 6,
               backgroundColor: theme.accentLight,
               display: 'flex',
               alignItems: 'center',
@@ -3557,7 +3561,7 @@ export default function AnkkiDesignV2() {
             }}>
               <stat.icon size={22} />
             </div>
-            <div style={{ fontSize: 28, fontWeight: 600, color: theme.text, marginBottom: 4, fontFamily: "'DM Sans', sans-serif" }}>{stat.value}</div>
+            <div style={{ fontSize: 28, fontWeight: 600, color: theme.text, marginBottom: 4, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>{stat.value}</div>
             <div style={{ fontSize: 13, color: theme.textSecondary }}>{stat.label}</div>
           </div>
         ))}
@@ -3565,7 +3569,7 @@ export default function AnkkiDesignV2() {
 
       <div style={{
         backgroundColor: theme.cardBg,
-        borderRadius: 14,
+        borderRadius: 6,
         border: `1px solid ${theme.border}`,
       }}>
         <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}` }}>
@@ -3623,7 +3627,7 @@ export default function AnkkiDesignV2() {
 
       <div style={{
         backgroundColor: theme.cardBg,
-        borderRadius: 14,
+        borderRadius: 6,
         border: `1px solid ${theme.border}`,
         marginBottom: 24,
       }}>
@@ -3672,7 +3676,7 @@ export default function AnkkiDesignV2() {
 
       <div style={{
         backgroundColor: theme.cardBg,
-        borderRadius: 14,
+        borderRadius: 6,
         border: `1px solid ${theme.border}`,
       }}>
         <div style={{ padding: '18px 24px', borderBottom: `1px solid ${theme.border}` }}>
@@ -3691,7 +3695,7 @@ export default function AnkkiDesignV2() {
               <div style={{
                 width: 48,
                 height: 26,
-                borderRadius: 13,
+                borderRadius: 6,
                 backgroundColor: setting.active ? theme.accent : theme.bgTertiary,
                 padding: 3,
                 cursor: 'pointer',
@@ -3745,7 +3749,7 @@ export default function AnkkiDesignV2() {
             <div style={{
               flex: 1,
               backgroundColor: currentPageData?.color || '#1e40af',
-              borderRadius: 12,
+              borderRadius: 6,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -3788,7 +3792,7 @@ export default function AnkkiDesignV2() {
                   fontWeight: 600, 
                   marginBottom: 20,
                   lineHeight: 1.3,
-                  fontFamily: "'DM Sans', sans-serif",
+                  fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
                 }}>
                   {isComplete ? currentPageData?.content : currentPageData?.title}
                 </div>
@@ -3883,7 +3887,7 @@ export default function AnkkiDesignV2() {
           <div style={{
             width: 320,
             backgroundColor: theme.cardBg,
-            borderRadius: 12,
+            borderRadius: 6,
             padding: 24,
             display: 'flex',
             flexDirection: 'column',
@@ -4063,7 +4067,7 @@ export default function AnkkiDesignV2() {
           width: isExcel || isPDF || isWord || isPPT ? 1000 : isZip ? 700 : 800,
           maxHeight: '90vh',
           backgroundColor: theme.cardBg,
-          borderRadius: 16,
+          borderRadius: 8,
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -4238,7 +4242,7 @@ export default function AnkkiDesignV2() {
               <div style={{ fontSize: 14, color: theme.textSecondary, marginBottom: 24 }}>品牌标准色彩规范</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16 }}>
                 {previewAsset.imagePreview.colors.map((color, i) => (
-                  <div key={i} style={{ borderRadius: 12, overflow: 'hidden', border: `1px solid ${theme.border}` }}>
+                  <div key={i} style={{ borderRadius: 6, overflow: 'hidden', border: `1px solid ${theme.border}` }}>
                     <div style={{ height: 100, backgroundColor: color.hex }} />
                     <div style={{ padding: 12, backgroundColor: theme.bgTertiary }}>
                       <div style={{ fontSize: 13, fontWeight: 600, color: theme.text, marginBottom: 4 }}>{color.name}</div>
@@ -4257,9 +4261,9 @@ export default function AnkkiDesignV2() {
               <div style={{ fontSize: 14, color: theme.textSecondary, marginBottom: 24 }}>Logo 变体预览</div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
                 {previewAsset.svgPreview.variants.map((variant, i) => (
-                  <div key={i} style={{ borderRadius: 12, overflow: 'hidden', border: `1px solid ${theme.border}` }}>
+                  <div key={i} style={{ borderRadius: 6, overflow: 'hidden', border: `1px solid ${theme.border}` }}>
                     <div style={{ height: 160, backgroundColor: variant.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <div style={{ width: 80, height: 80, borderRadius: 16, backgroundColor: variant.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: variant.bg, fontSize: 32, fontWeight: 700, fontFamily: "'DM Sans', sans-serif" }}>A</div>
+                      <div style={{ width: 80, height: 80, borderRadius: 8, backgroundColor: variant.color, display: 'flex', alignItems: 'center', justifyContent: 'center', color: variant.bg, fontSize: 32, fontWeight: 700, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>A</div>
                     </div>
                     <div style={{ padding: 12, backgroundColor: theme.bgTertiary, textAlign: 'center' }}>
                       <div style={{ fontSize: 13, fontWeight: 500, color: theme.text }}>{variant.name}</div>
@@ -4337,9 +4341,11 @@ export default function AnkkiDesignV2() {
       <div style={{ padding: 28 }}>
         <div style={{
           padding: 28,
-          borderRadius: 18,
+          borderRadius: 8,
           marginBottom: 24,
-          background: `linear-gradient(135deg, ${theme.accent}, #f19a77 55%, #f6c7a5 120%)`,
+          background: darkMode
+            ? `linear-gradient(135deg, #1d4ed8, #2563eb 55%, #3b82f6 120%)`
+            : `linear-gradient(135deg, #1260cc, #1478F0 55%, #3b9cf7 120%)`,
           color: '#fff',
           display: 'flex',
           justifyContent: 'space-between',
@@ -4348,7 +4354,7 @@ export default function AnkkiDesignV2() {
         }}>
           <div style={{ maxWidth: 720 }}>
             <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.8px', opacity: 0.85, marginBottom: 12 }}>AI CONTENT STUDIO</div>
-            <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>AI 视频生成</h2>
+            <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 10, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>AI 视频生成</h2>
             <p style={{ fontSize: 15, lineHeight: 1.7, opacity: 0.92 }}>
               输入主题、场景和传播目标，快速生成视频脚本、分镜节奏和交付建议，适合品牌发布、案例传播和社媒短片。
             </p>
@@ -4362,7 +4368,7 @@ export default function AnkkiDesignV2() {
               <div key={item.label} style={{
                 minWidth: 120,
                 padding: '14px 16px',
-                borderRadius: 12,
+                borderRadius: 6,
                 backgroundColor: 'rgba(255,255,255,0.14)',
                 backdropFilter: 'blur(8px)',
               }}>
@@ -4376,7 +4382,7 @@ export default function AnkkiDesignV2() {
         <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 0.9fr', gap: 20, marginBottom: 24 }}>
           <div style={{
             backgroundColor: theme.cardBg,
-            borderRadius: 16,
+            borderRadius: 8,
             border: `1px solid ${theme.border}`,
             padding: 24,
           }}>
@@ -4415,7 +4421,7 @@ export default function AnkkiDesignV2() {
                 style={{
                   width: '100%',
                   padding: '14px 16px',
-                  borderRadius: 10,
+                  borderRadius: 5,
                   border: `1px solid ${theme.border}`,
                   backgroundColor: theme.bg,
                   color: theme.text,
@@ -4436,7 +4442,7 @@ export default function AnkkiDesignV2() {
                   style={{
                     width: '100%',
                     padding: '12px 14px',
-                    borderRadius: 10,
+                    borderRadius: 5,
                     border: `1px solid ${theme.border}`,
                     backgroundColor: theme.bg,
                     color: theme.text,
@@ -4453,7 +4459,7 @@ export default function AnkkiDesignV2() {
                   style={{
                     width: '100%',
                     padding: '12px 14px',
-                    borderRadius: 10,
+                    borderRadius: 5,
                     border: `1px solid ${theme.border}`,
                     backgroundColor: theme.bg,
                     color: theme.text,
@@ -4478,7 +4484,7 @@ export default function AnkkiDesignV2() {
                     style={{
                       width: '100%',
                       padding: '12px 14px',
-                      borderRadius: 10,
+                      borderRadius: 5,
                       border: `1px solid ${theme.border}`,
                       backgroundColor: theme.bg,
                       color: theme.text,
@@ -4495,7 +4501,7 @@ export default function AnkkiDesignV2() {
               <div style={{
                 marginBottom: 16,
                 padding: '12px 14px',
-                borderRadius: 10,
+                borderRadius: 5,
                 backgroundColor: darkMode ? 'rgba(239, 68, 68, 0.12)' : 'rgba(239, 68, 68, 0.08)',
                 border: '1px solid rgba(239, 68, 68, 0.2)',
                 color: '#ef4444',
@@ -4512,7 +4518,7 @@ export default function AnkkiDesignV2() {
                 disabled={!videoForm.idea.trim() || videoGenerating}
                 style={{
                   padding: '12px 20px',
-                  borderRadius: 10,
+                  borderRadius: 5,
                   border: 'none',
                   backgroundColor: !videoForm.idea.trim() || videoGenerating ? theme.bgTertiary : theme.accent,
                   color: '#fff',
@@ -4530,7 +4536,7 @@ export default function AnkkiDesignV2() {
               <button
                 style={{
                   padding: '12px 20px',
-                  borderRadius: 10,
+                  borderRadius: 5,
                   border: `1px solid ${theme.border}`,
                   backgroundColor: theme.bgTertiary,
                   color: theme.textSecondary,
@@ -4555,14 +4561,14 @@ export default function AnkkiDesignV2() {
             ].map(card => (
               <div key={card.title} style={{
                 padding: 20,
-                borderRadius: 16,
+                borderRadius: 8,
                 backgroundColor: theme.cardBg,
                 border: `1px solid ${theme.border}`,
               }}>
                 <div style={{
                   width: 42,
                   height: 42,
-                  borderRadius: 12,
+                  borderRadius: 6,
                   backgroundColor: darkMode ? 'rgba(255,255,255,0.05)' : theme.bgTertiary,
                   color: card.accentColor,
                   display: 'flex',
@@ -4582,7 +4588,7 @@ export default function AnkkiDesignV2() {
         <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 20 }}>
           <div style={{
             backgroundColor: theme.cardBg,
-            borderRadius: 16,
+            borderRadius: 8,
             border: `1px solid ${theme.border}`,
             overflow: 'hidden',
           }}>
@@ -4601,7 +4607,7 @@ export default function AnkkiDesignV2() {
                       width: '100%',
                       padding: 14,
                       marginBottom: 8,
-                      borderRadius: 12,
+                      borderRadius: 6,
                       border: selectedVideoProjectId === project.id ? `1px solid ${theme.accent}` : `1px solid transparent`,
                       backgroundColor: selectedVideoProjectId === project.id ? theme.accentLight : theme.bgTertiary,
                       cursor: 'pointer',
@@ -4624,7 +4630,7 @@ export default function AnkkiDesignV2() {
 
           <div style={{
             backgroundColor: theme.cardBg,
-            borderRadius: 16,
+            borderRadius: 8,
             border: `1px solid ${theme.border}`,
             padding: 24,
           }}>
@@ -4648,7 +4654,7 @@ export default function AnkkiDesignV2() {
                   </div>
                   <button style={{
                     padding: '10px 16px',
-                    borderRadius: 10,
+                    borderRadius: 5,
                     border: `1px solid ${theme.border}`,
                     backgroundColor: theme.bgTertiary,
                     color: theme.textSecondary,
@@ -4667,7 +4673,7 @@ export default function AnkkiDesignV2() {
                   ].map(item => (
                     <div key={item.label} style={{
                       padding: 16,
-                      borderRadius: 12,
+                      borderRadius: 6,
                       backgroundColor: theme.bgTertiary,
                     }}>
                       <div style={{ fontSize: 12, color: theme.textMuted, marginBottom: 6 }}>{item.label}</div>
@@ -4681,7 +4687,7 @@ export default function AnkkiDesignV2() {
                   {activeVideoProject.scenes.map(scene => (
                     <div key={`${activeVideoProject.id}-${scene.title}`} style={{
                       padding: 18,
-                      borderRadius: 14,
+                      borderRadius: 6,
                       border: `1px solid ${theme.border}`,
                       backgroundColor: theme.bgSecondary,
                     }}>
@@ -4743,7 +4749,7 @@ export default function AnkkiDesignV2() {
       <div style={{ padding: 28 }}>
         <div style={{
           padding: 28,
-          borderRadius: 18,
+          borderRadius: 8,
           marginBottom: 24,
           background: darkMode
             ? 'linear-gradient(135deg, #1f3a8a, #0f766e 60%, #164e63 120%)'
@@ -4756,7 +4762,7 @@ export default function AnkkiDesignV2() {
         }}>
           <div style={{ maxWidth: 720 }}>
             <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.8px', opacity: 0.85, marginBottom: 12 }}>SMART DECK BUILDER</div>
-            <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>PPT 生成</h2>
+            <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 10, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>PPT 生成</h2>
             <p style={{ fontSize: 15, lineHeight: 1.7, opacity: 0.92 }}>
               输入演示主题、对象和页数目标，自动生成汇报结构、页面文案和版式建议，适用于经营汇报、方案提案和大会演讲。
             </p>
@@ -4770,7 +4776,7 @@ export default function AnkkiDesignV2() {
               <div key={item.label} style={{
                 minWidth: 120,
                 padding: '14px 16px',
-                borderRadius: 12,
+                borderRadius: 6,
                 backgroundColor: 'rgba(255,255,255,0.14)',
                 backdropFilter: 'blur(8px)',
               }}>
@@ -4784,7 +4790,7 @@ export default function AnkkiDesignV2() {
         <div style={{ display: 'grid', gridTemplateColumns: '1.35fr 0.95fr', gap: 20, marginBottom: 24 }}>
           <div style={{
             backgroundColor: theme.cardBg,
-            borderRadius: 16,
+            borderRadius: 8,
             border: `1px solid ${theme.border}`,
             padding: 24,
           }}>
@@ -4823,7 +4829,7 @@ export default function AnkkiDesignV2() {
                 style={{
                   width: '100%',
                   padding: '12px 14px',
-                  borderRadius: 10,
+                  borderRadius: 5,
                   border: `1px solid ${theme.border}`,
                   backgroundColor: theme.bg,
                   color: theme.text,
@@ -4842,7 +4848,7 @@ export default function AnkkiDesignV2() {
                   style={{
                     width: '100%',
                     padding: '12px 14px',
-                    borderRadius: 10,
+                    borderRadius: 5,
                     border: `1px solid ${theme.border}`,
                     backgroundColor: theme.bg,
                     color: theme.text,
@@ -4858,7 +4864,7 @@ export default function AnkkiDesignV2() {
                   style={{
                     width: '100%',
                     padding: '12px 14px',
-                    borderRadius: 10,
+                    borderRadius: 5,
                     border: `1px solid ${theme.border}`,
                     backgroundColor: theme.bg,
                     color: theme.text,
@@ -4876,7 +4882,7 @@ export default function AnkkiDesignV2() {
                   style={{
                     width: '100%',
                     padding: '12px 14px',
-                    borderRadius: 10,
+                    borderRadius: 5,
                     border: `1px solid ${theme.border}`,
                     backgroundColor: theme.bg,
                     color: theme.text,
@@ -4897,7 +4903,7 @@ export default function AnkkiDesignV2() {
                   style={{
                     width: '100%',
                     padding: '12px 14px',
-                    borderRadius: 10,
+                    borderRadius: 5,
                     border: `1px solid ${theme.border}`,
                     backgroundColor: theme.bg,
                     color: theme.text,
@@ -4916,7 +4922,7 @@ export default function AnkkiDesignV2() {
                   style={{
                     width: '100%',
                     padding: '12px 14px',
-                    borderRadius: 10,
+                    borderRadius: 5,
                     border: `1px solid ${theme.border}`,
                     backgroundColor: theme.bg,
                     color: theme.text,
@@ -4932,7 +4938,7 @@ export default function AnkkiDesignV2() {
               <div style={{
                 marginBottom: 16,
                 padding: '12px 14px',
-                borderRadius: 10,
+                borderRadius: 5,
                 backgroundColor: darkMode ? 'rgba(239, 68, 68, 0.12)' : 'rgba(239, 68, 68, 0.08)',
                 border: '1px solid rgba(239, 68, 68, 0.2)',
                 color: '#ef4444',
@@ -4947,7 +4953,7 @@ export default function AnkkiDesignV2() {
               <div style={{
                 marginBottom: 16,
                 padding: '12px 14px',
-                borderRadius: 10,
+                borderRadius: 5,
                 backgroundColor: darkMode ? 'rgba(245, 158, 11, 0.14)' : 'rgba(245, 158, 11, 0.1)',
                 border: '1px solid rgba(245, 158, 11, 0.22)',
                 color: theme.warning,
@@ -4964,7 +4970,7 @@ export default function AnkkiDesignV2() {
                 disabled={!pptForm.topic.trim() || pptGenerating}
                 style={{
                   padding: '12px 20px',
-                  borderRadius: 10,
+                  borderRadius: 5,
                   border: 'none',
                   backgroundColor: !pptForm.topic.trim() || pptGenerating ? theme.bgTertiary : theme.accent,
                   color: '#fff',
@@ -4983,7 +4989,7 @@ export default function AnkkiDesignV2() {
                 onClick={() => downloadPptProject(activePptProject)}
                 style={{
                   padding: '12px 20px',
-                  borderRadius: 10,
+                  borderRadius: 5,
                   border: `1px solid ${theme.border}`,
                   backgroundColor: theme.bgTertiary,
                   color: theme.textSecondary,
@@ -5008,14 +5014,14 @@ export default function AnkkiDesignV2() {
             ].map(card => (
               <div key={card.title} style={{
                 padding: 20,
-                borderRadius: 16,
+                borderRadius: 8,
                 backgroundColor: theme.cardBg,
                 border: `1px solid ${theme.border}`,
               }}>
                 <div style={{
                   width: 42,
                   height: 42,
-                  borderRadius: 12,
+                  borderRadius: 6,
                   backgroundColor: darkMode ? 'rgba(255,255,255,0.05)' : theme.bgTertiary,
                   color: card.accentColor,
                   display: 'flex',
@@ -5035,7 +5041,7 @@ export default function AnkkiDesignV2() {
         <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 20 }}>
           <div style={{
             backgroundColor: theme.cardBg,
-            borderRadius: 16,
+            borderRadius: 8,
             border: `1px solid ${theme.border}`,
             overflow: 'hidden',
           }}>
@@ -5054,7 +5060,7 @@ export default function AnkkiDesignV2() {
                       width: '100%',
                       padding: 14,
                       marginBottom: 8,
-                      borderRadius: 12,
+                      borderRadius: 6,
                       border: selectedPptProjectId === project.id ? `1px solid ${theme.accent}` : `1px solid transparent`,
                       backgroundColor: selectedPptProjectId === project.id ? theme.accentLight : theme.bgTertiary,
                       cursor: 'pointer',
@@ -5077,7 +5083,7 @@ export default function AnkkiDesignV2() {
 
           <div style={{
             backgroundColor: theme.cardBg,
-            borderRadius: 16,
+            borderRadius: 8,
             border: `1px solid ${theme.border}`,
             padding: 24,
           }}>
@@ -5105,7 +5111,7 @@ export default function AnkkiDesignV2() {
                     onClick={() => downloadPptProject(activePptProject)}
                     style={{
                     padding: '10px 16px',
-                    borderRadius: 10,
+                    borderRadius: 5,
                     border: `1px solid ${theme.border}`,
                     backgroundColor: theme.bgTertiary,
                     color: theme.textSecondary,
@@ -5124,7 +5130,7 @@ export default function AnkkiDesignV2() {
                   ].map(item => (
                     <div key={item.label} style={{
                       padding: 16,
-                      borderRadius: 12,
+                      borderRadius: 6,
                       backgroundColor: theme.bgTertiary,
                     }}>
                       <div style={{ fontSize: 12, color: theme.textMuted, marginBottom: 6 }}>{item.label}</div>
@@ -5141,14 +5147,14 @@ export default function AnkkiDesignV2() {
                       gridTemplateColumns: '72px 1fr',
                       gap: 14,
                       padding: 18,
-                      borderRadius: 14,
+                      borderRadius: 6,
                       border: `1px solid ${theme.border}`,
                       backgroundColor: theme.bgSecondary,
                     }}>
                       <div style={{
-                        borderRadius: 12,
+                        borderRadius: 6,
                         background: index % 2 === 0
-                          ? `linear-gradient(135deg, ${theme.accent}, #f19a77)`
+                          ? `linear-gradient(135deg, ${theme.accent}, #2563eb)`
                           : darkMode
                             ? 'linear-gradient(135deg, #1d4ed8, #0f766e)'
                             : 'linear-gradient(135deg, #1d4ed8, #38bdf8)',
@@ -5158,7 +5164,7 @@ export default function AnkkiDesignV2() {
                         justifyContent: 'center',
                         fontSize: 18,
                         fontWeight: 700,
-                        fontFamily: "'DM Sans', sans-serif",
+                        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
                       }}>
                         {index + 1}
                       </div>
@@ -5241,7 +5247,7 @@ export default function AnkkiDesignV2() {
           {/* 提交反馈 */}
           <div style={{
             backgroundColor: theme.cardBg,
-            borderRadius: 14,
+            borderRadius: 6,
             border: `1px solid ${theme.border}`,
             overflow: 'hidden',
           }}>
@@ -5261,7 +5267,7 @@ export default function AnkkiDesignV2() {
                         padding: 14,
                         backgroundColor: feedbackType === type.id ? `${type.color}15` : theme.bgTertiary,
                         border: feedbackType === type.id ? `2px solid ${type.color}` : `1px solid ${theme.border}`,
-                        borderRadius: 10,
+                        borderRadius: 5,
                         cursor: 'pointer',
                         textAlign: 'left',
                         transition: 'all 0.15s ease',
@@ -5350,7 +5356,7 @@ export default function AnkkiDesignV2() {
           {/* 我的反馈历史 */}
           <div style={{
             backgroundColor: theme.cardBg,
-            borderRadius: 14,
+            borderRadius: 6,
             border: `1px solid ${theme.border}`,
             overflow: 'hidden',
           }}>
@@ -5459,7 +5465,7 @@ export default function AnkkiDesignV2() {
           display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
         }} onClick={() => setSelectedFeedback(null)}>
           <div style={{
-            width: 560, maxHeight: '90vh', backgroundColor: theme.cardBg, borderRadius: 16, overflow: 'hidden',
+            width: 560, maxHeight: '90vh', backgroundColor: theme.cardBg, borderRadius: 8, overflow: 'hidden',
             display: 'flex', flexDirection: 'column',
           }} onClick={e => e.stopPropagation()}>
             <div style={{
@@ -5469,7 +5475,7 @@ export default function AnkkiDesignV2() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 {typeInfo && (
                   <div style={{
-                    width: 40, height: 40, borderRadius: 10, backgroundColor: `${typeInfo.color}15`,
+                    width: 40, height: 40, borderRadius: 5, backgroundColor: `${typeInfo.color}15`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     <typeInfo.icon size={20} color={typeInfo.color} />
@@ -5507,7 +5513,7 @@ export default function AnkkiDesignV2() {
 
               {/* 反馈内容 */}
               <div style={{
-                padding: 16, backgroundColor: theme.bgTertiary, borderRadius: 10, marginBottom: 20,
+                padding: 16, backgroundColor: theme.bgTertiary, borderRadius: 5, marginBottom: 20,
               }}>
                 <div style={{ fontSize: 14, color: theme.text, lineHeight: 1.8 }}>{selectedFeedback.content}</div>
                 <div style={{ fontSize: 12, color: theme.textMuted, marginTop: 12 }}>提交于 {selectedFeedback.createdAt}</div>
@@ -5516,7 +5522,7 @@ export default function AnkkiDesignV2() {
               {/* 已有回复 */}
               {selectedFeedback.reply && (
                 <div style={{
-                  padding: 16, backgroundColor: 'rgba(217, 119, 87, 0.08)', borderRadius: 10,
+                  padding: 16, backgroundColor: 'rgba(217, 119, 87, 0.08)', borderRadius: 5,
                   borderLeft: `3px solid ${theme.accent}`, marginBottom: 20,
                 }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: theme.accent, marginBottom: 8 }}>官方回复</div>
@@ -5585,9 +5591,9 @@ export default function AnkkiDesignV2() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
           {stats.map((stat, i) => (
             <div key={i} style={{
-              padding: 20, backgroundColor: theme.cardBg, borderRadius: 12, border: `1px solid ${theme.border}`,
+              padding: 20, backgroundColor: theme.cardBg, borderRadius: 6, border: `1px solid ${theme.border}`,
             }}>
-              <div style={{ fontSize: 28, fontWeight: 600, color: stat.color, marginBottom: 4, fontFamily: "'DM Sans', sans-serif" }}>{stat.value}</div>
+              <div style={{ fontSize: 28, fontWeight: 600, color: stat.color, marginBottom: 4, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>{stat.value}</div>
               <div style={{ fontSize: 13, color: theme.textSecondary }}>{stat.label}</div>
             </div>
           ))}
@@ -5619,7 +5625,7 @@ export default function AnkkiDesignV2() {
 
         {/* 反馈列表 */}
         <div style={{
-          backgroundColor: theme.cardBg, borderRadius: 14, border: `1px solid ${theme.border}`, overflow: 'hidden',
+          backgroundColor: theme.cardBg, borderRadius: 6, border: `1px solid ${theme.border}`, overflow: 'hidden',
         }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
@@ -5699,12 +5705,11 @@ export default function AnkkiDesignV2() {
     <div style={{
       minHeight: '100vh',
       backgroundColor: theme.bg,
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
       color: theme.text,
       display: 'flex',
     }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         input::placeholder, textarea::placeholder { color: ${theme.textMuted}; }
         ::-webkit-scrollbar { width: 6px; }
