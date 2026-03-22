@@ -396,15 +396,23 @@ function AdminFeedbackView({ theme, darkMode }) {
       <div style={{
         backgroundColor: theme.cardBg, borderRadius: 6, border: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', overflow: 'hidden',
       }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: 'auto' }} />
+            <col style={{ width: 110 }} />
+            <col style={{ width: 90 }} />
+            <col style={{ width: 155 }} />
+            <col style={{ width: 80 }} />
+            <col style={{ width: 72 }} />
+          </colgroup>
           <thead>
             <tr style={{ backgroundColor: theme.bgTertiary }}>
-              <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: theme.textMuted }}>反馈内容</th>
-              <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: theme.textMuted, width: 100 }}>类型</th>
-              <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: theme.textMuted, width: 120 }}>提交人</th>
-              <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: theme.textMuted, width: 140 }}>时间</th>
-              <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: theme.textMuted, width: 90 }}>状态</th>
-              <th style={{ padding: '14px 20px', textAlign: 'center', fontSize: 12, fontWeight: 600, color: theme.textMuted, width: 80 }}>操作</th>
+              <th style={{ padding: '12px 20px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: theme.textMuted }}>反馈内容</th>
+              <th style={{ padding: '12px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: theme.textMuted }}>类型</th>
+              <th style={{ padding: '12px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: theme.textMuted }}>提交人</th>
+              <th style={{ padding: '12px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: theme.textMuted }}>时间</th>
+              <th style={{ padding: '12px 12px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: theme.textMuted }}>状态</th>
+              <th style={{ padding: '12px 12px', textAlign: 'center', fontSize: 12, fontWeight: 600, color: theme.textMuted }}>操作</th>
             </tr>
           </thead>
           <tbody>
@@ -412,31 +420,31 @@ function AdminFeedbackView({ theme, darkMode }) {
               const statusInfo = getStatusInfo(feedback.status, theme);
               const typeInfo = feedbackTypes.find(t => t.id === feedback.type);
               return (
-                <tr key={feedback.id} style={{ borderBottom: `1px solid ${theme.border}` }}>
+                <tr key={feedback.id} className="table-row" style={{ borderBottom: `1px solid ${theme.border}40` }}>
                   <td style={{ padding: '14px 20px' }}>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: theme.text, marginBottom: 4 }}>{feedback.title}</div>
-                    <div style={{ fontSize: 12, color: theme.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>{feedback.content}</div>
+                    <div style={{ fontSize: 13.5, fontWeight: 500, color: theme.text, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{feedback.title}</div>
+                    <div style={{ fontSize: 12, color: theme.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{feedback.content}</div>
                   </td>
-                  <td style={{ padding: '14px 20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      {typeInfo && <typeInfo.icon size={14} color={typeInfo.color} />}
+                  <td style={{ padding: '14px 12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap' }}>
+                      {typeInfo && <typeInfo.icon size={13} color={typeInfo.color} />}
                       <span style={{ fontSize: 12, color: typeInfo?.color }}>{typeInfo?.name}</span>
                     </div>
                   </td>
-                  <td style={{ padding: '14px 20px', fontSize: 13, color: theme.textSecondary }}>{feedback.user}</td>
-                  <td style={{ padding: '14px 20px', fontSize: 12, color: theme.textMuted }}>{feedback.createdAt}</td>
-                  <td style={{ padding: '14px 20px' }}>
+                  <td style={{ padding: '14px 12px', fontSize: 13, color: theme.textSecondary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{feedback.user}</td>
+                  <td style={{ padding: '14px 12px', fontSize: 12, color: theme.textMuted, whiteSpace: 'nowrap' }}>{feedback.createdAt}</td>
+                  <td style={{ padding: '14px 12px' }}>
                     <span style={{
-                      fontSize: 11, fontWeight: 500, padding: '4px 10px', borderRadius: 4,
-                      backgroundColor: statusInfo.bg, color: statusInfo.color,
+                      fontSize: 11, fontWeight: 500, padding: '3px 8px', borderRadius: 4,
+                      backgroundColor: statusInfo.bg, color: statusInfo.color, whiteSpace: 'nowrap',
                     }}>{statusInfo.name}</span>
                   </td>
-                  <td style={{ padding: '14px 20px', textAlign: 'center' }}>
+                  <td style={{ padding: '14px 12px', textAlign: 'center' }}>
                     <button
                       onClick={() => setSelectedFeedback(feedback)}
                       style={{
-                        padding: '6px 12px', fontSize: 12, backgroundColor: theme.accentLight,
-                        color: theme.accent, border: 'none', borderRadius: 6, cursor: 'pointer',
+                        padding: '5px 10px', fontSize: 12, backgroundColor: theme.accentLight,
+                        color: theme.accent, border: 'none', borderRadius: 5, cursor: 'pointer', whiteSpace: 'nowrap',
                       }}
                     >查看</button>
                   </td>
