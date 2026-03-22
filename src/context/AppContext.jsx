@@ -32,6 +32,7 @@ export function AppProvider({ children }) {
   const [pptError, setPptError] = useState('');
   const [pptExporting, setPptExporting] = useState(false);
   const [pptExportError, setPptExportError] = useState('');
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   const hasPermission = useCallback((permission) => {
     const permissions = {
@@ -105,6 +106,7 @@ export function AppProvider({ children }) {
       pptProjects, setPptProjects, selectedPptProjectId, setSelectedPptProjectId,
       pptGenerating, setPptGenerating, pptError, setPptError,
       pptExporting, setPptExporting, pptExportError, setPptExportError,
+      uploadOpen, setUploadOpen,
       hasPermission, isSuperAdmin, isAdmin, theme, getGenerationStatusMeta,
       callGenerationApi, downloadPptProject,
     }}>

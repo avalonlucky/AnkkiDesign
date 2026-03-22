@@ -2,6 +2,7 @@ import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
+import UploadModal from './components/UploadModal';
 import Dashboard from './views/user/Dashboard';
 import Assets from './views/user/Assets';
 import PPTHub from './views/user/PPTHub';
@@ -32,7 +33,7 @@ function renderView(currentView) {
 }
 
 function AppShell() {
-  const { currentView, theme, darkMode, isAdmin } = useApp();
+  const { currentView, theme, darkMode, isAdmin, uploadOpen } = useApp();
 
   return (
     <div style={{
@@ -150,6 +151,7 @@ function AppShell() {
 
       <Sidebar />
       <TopBar />
+      {uploadOpen && <UploadModal />}
 
       <main style={{ marginLeft: 240, flex: 1, minHeight: '100vh', paddingTop: isAdmin ? 48 : 0 }}>
         <div key={currentView} className="page-view">

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { FolderOpen, Grid, ChevronRight, LogOut, Play, Presentation, Folder, Image, FileText, MessageSquare, Bookmark, Shield } from 'lucide-react';
+import { Grid, ChevronRight, LogOut, Play, Presentation, Folder, Image, FileText, MessageSquare, Shield } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { categories } from '../data/mockData';
 
@@ -13,7 +13,6 @@ export default function Sidebar() {
 
   const navItems = [
     { id: 'dashboard', name: '工作台', icon: Grid },
-    { id: 'assets', name: '素材库', icon: FolderOpen },
     { id: 'ai-video', name: 'AI视频', icon: Play },
     { id: 'ppt-hub', name: 'PPT工具', icon: Presentation },
   ];
@@ -100,7 +99,7 @@ export default function Sidebar() {
                 padding: '9px 10px', marginBottom: 2, border: 'none', borderRadius: 6, cursor: 'pointer',
                 backgroundColor: isNavActive(item.id) ? theme.accentLight : 'transparent',
                 color: isNavActive(item.id) ? theme.accent : theme.textSecondary,
-                fontSize: 13.5, fontWeight: isNavActive(item.id) ? 500 : 400,
+                fontSize: 13, fontWeight: isNavActive(item.id) ? 500 : 400,
                 transition: 'all 0.15s ease',
               }}
             >
@@ -135,19 +134,17 @@ export default function Sidebar() {
                   padding: '9px 10px', marginBottom: 2, border: 'none', borderRadius: 6, cursor: 'pointer',
                   backgroundColor: isActive ? theme.accentLight : 'transparent',
                   color: isActive ? theme.accent : theme.textSecondary,
-                  fontSize: 13.5, transition: 'all 0.15s ease',
+                  fontSize: 13, transition: 'all 0.15s ease',
                 }}
               >
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  {hasChildren ? (
-                    <ChevronRight size={13} style={{ transition: 'transform 0.2s', transform: isExpanded ? 'rotate(90deg)' : 'none', color: theme.textMuted, flexShrink: 0 }} />
-                  ) : (
-                    <span style={{ width: 13, flexShrink: 0 }} />
-                  )}
                   <cat.icon size={15} />
                   {cat.name}
                 </span>
-                <span style={{ fontSize: 11, color: theme.textMuted, backgroundColor: theme.tagBg, padding: '1px 6px', borderRadius: 4 }}>{cat.count}</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ fontSize: 11, color: theme.textMuted, backgroundColor: theme.tagBg, padding: '1px 6px', borderRadius: 4 }}>{cat.count}</span>
+                  {hasChildren && <ChevronRight size={12} style={{ transition: 'transform 0.2s', transform: isExpanded ? 'rotate(90deg)' : 'none', color: theme.textMuted, flexShrink: 0 }} />}
+                </span>
               </button>
 
               {hasChildren && isExpanded && (
@@ -166,7 +163,7 @@ export default function Sidebar() {
                         padding: '7px 10px', marginBottom: 1, border: 'none', borderRadius: 5, cursor: 'pointer',
                         backgroundColor: selectedSubCategory === sub.id ? theme.accentLight : 'transparent',
                         color: selectedSubCategory === sub.id ? theme.accent : theme.textMuted,
-                        fontSize: 12.5, transition: 'all 0.15s ease',
+                        fontSize: 12, transition: 'all 0.15s ease',
                       }}
                     >
                       <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>

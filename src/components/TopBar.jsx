@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Settings, Users, Shield, BarChart3, MessageSquare, ChevronDown, Moon, Sun } from 'lucide-react';
+import { Settings, Users, Shield, BarChart3, MessageSquare, ChevronDown, Moon, Sun, Upload } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function TopBar() {
-  const { isAdmin, isSuperAdmin, theme, currentView, setCurrentView, darkMode, setDarkMode } = useApp();
+  const { isAdmin, isSuperAdmin, theme, currentView, setCurrentView, darkMode, setDarkMode, setUploadOpen } = useApp();
   const [adminOpen, setAdminOpen] = useState(false);
 
   if (!isAdmin) return null;
@@ -34,6 +34,22 @@ export default function TopBar() {
       padding: '0 20px',
       zIndex: 100,
     }}>
+      {/* Upload button */}
+      {isAdmin && (
+        <button
+          onClick={() => setUploadOpen(true)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '6px 14px', borderRadius: 6,
+            border: 'none', backgroundColor: theme.accent,
+            color: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 500,
+          }}
+        >
+          <Upload size={13} />
+          上传素材
+        </button>
+      )}
+
       {/* Dark mode toggle */}
       <button
         onClick={() => setDarkMode(!darkMode)}
